@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Footer from '@/components/ui/Footer';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -172,7 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)]">
       <Sidebar />
-      <main className="flex-1 lg:ml-[220px] pb-20 lg:pb-0">
+      <main className="flex-1 lg:ml-[220px] pb-20 lg:pb-0 flex flex-col">
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}
@@ -180,11 +181,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="min-h-screen"
+            className="flex-1"
           >
             {children}
           </motion.div>
         </AnimatePresence>
+        <Footer />
       </main>
       <MobileNav />
     </div>

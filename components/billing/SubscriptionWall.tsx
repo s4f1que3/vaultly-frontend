@@ -155,7 +155,7 @@ export default function SubscriptionWall({ access }: Props) {
             Use a lifetime license
           </Link>
           <span>·</span>
-          <a href="mailto:support@vaultly.app" className="hover:text-[var(--color-accent)] transition-colors">
+          <a href="mailto:contact@vaultly.app" className="hover:text-[var(--color-accent)] transition-colors">
             Contact support
           </a>
         </div>

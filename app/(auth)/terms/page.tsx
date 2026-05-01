@@ -309,7 +309,7 @@ export default function TermsPage() {
               or your account, please contact us at:
             </p>
             <p className="text-[var(--color-text-primary)] font-medium">
-              support@vaultly.cash
+              contact@vaultly.cash
             </p>
             <p>
               We aim to respond to all inquiries within 2 business days.
