@@ -32,7 +32,7 @@ export type TransactionType = 'income' | 'expense' | 'transfer';
 export type TransactionCategory =
   | 'food' | 'transport' | 'shopping' | 'entertainment' | 'health'
   | 'utilities' | 'housing' | 'education' | 'salary' | 'investment'
-  | 'transfer' | 'other';
+  | 'transfer' | 'other' | 'general';
 
 export interface Transaction {
   id: string;
