@@ -27,7 +27,7 @@ export const useSavingsStore = create<SavingsStore>((set, get) => ({
   fetchPots: async () => {
     set({ isLoading: true });
     try {
-      const res = await api.get('/savings-pots');
+      const res = await api.get<{ data: SavingsPot[] }>('/savings-pots');
       set({ pots: res.data ?? [] });
     } finally {
       set({ isLoading: false });
@@ -35,7 +35,7 @@ export const useSavingsStore = create<SavingsStore>((set, get) => ({
   },
 
   addPot: async (data) => {
-    const res = await api.post('/savings-pots', data);
+    const res = await api.post<SavingsPot>('/savings-pots', data);
     set((s) => ({ pots: [res, ...s.pots] }));
   },
 
