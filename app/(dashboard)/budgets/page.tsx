@@ -46,7 +46,8 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     setIsLoading(true);
     try {
       if (isEdit && budget) {
-        await updateBudget(budget.id, data as Partial<Budget>);
+        const { category: _cat, ...updateData } = data;
+        await updateBudget(budget.id, updateData as Partial<Budget>);
       } else {
         await addBudget(data as Partial<Budget>);
       }
@@ -61,7 +62,7 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Category</label>
-          <select {...register('category')} className="input-base">
+          <select {...register('category')} disabled={isEdit} className={`input-base ${isEdit ? 'opacity-50 cursor-not-allowed' : ''}`}>
             {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_ICONS[c]} {CATEGORY_LABELS[c]}</option>)}
           </select>
         </div>
