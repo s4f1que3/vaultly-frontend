@@ -46,7 +46,7 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     setIsLoading(true);
     try {
       if (isEdit && budget) {
-        const { category: _cat, ...updateData } = data;
+        const { category: _cat, period: _period, ...updateData } = data;
         await updateBudget(budget.id, updateData as Partial<Budget>);
       } else {
         await addBudget(data as Partial<Budget>);
