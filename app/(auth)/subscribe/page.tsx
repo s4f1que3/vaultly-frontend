@@ -47,6 +47,7 @@ const PLANS = [
     name: 'Yearly',
     price: 100,
     period: '/yr',
+    badge: 'Save $16',
     description: 'Billed once per year',
   },
 ];
