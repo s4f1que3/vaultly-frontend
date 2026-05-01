@@ -72,6 +72,14 @@ export default function CardsPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      {card.is_default && (
+                        <span className="badge badge-green">Default</span>
+                      )}
+                      <span className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">
+                        {card.card_kind === 'debit' ? 'Debit' : 'Credit'}
+                      </span>
+                    </div>
                     <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Balance</p>
                     <p className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(card.balance)}</p>
                   </div>
@@ -109,19 +117,17 @@ export default function CardsPage() {
 
                 <CreditCard card={card} mini />
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="bg-[var(--color-surface-2)] rounded-xl p-3">
-                    <p className="text-xs text-[var(--color-text-muted)]">Credit Limit</p>
-                    <p className="text-sm font-semibold text-[var(--color-text-primary)] mt-1">{formatCurrency(card.credit_limit)}</p>
+                {card.card_kind !== 'debit' && (
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="bg-[var(--color-surface-2)] rounded-xl p-3">
+                      <p className="text-xs text-[var(--color-text-muted)]">Credit Limit</p>
+                      <p className="text-sm font-semibold text-[var(--color-text-primary)] mt-1">{formatCurrency(card.credit_limit)}</p>
+                    </div>
+                    <div className="bg-[var(--color-surface-2)] rounded-xl p-3">
+                      <p className="text-xs text-[var(--color-text-muted)]">Available</p>
+                      <p className="text-sm font-semibold text-[var(--color-accent)] mt-1">{formatCurrency(card.credit_limit - card.balance)}</p>
+                    </div>
                   </div>
-                  <div className="bg-[var(--color-surface-2)] rounded-xl p-3">
-                    <p className="text-xs text-[var(--color-text-muted)]">Available</p>
-                    <p className="text-sm font-semibold text-[var(--color-accent)] mt-1">{formatCurrency(card.credit_limit - card.balance)}</p>
-                  </div>
-                </div>
-
-                {card.is_default && (
-                  <span className="absolute top-5 left-5 badge badge-green">Default</span>
                 )}
               </motion.div>
             ))}

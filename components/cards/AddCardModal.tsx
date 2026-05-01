@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import CreditCard from '@/components/cards/CreditCard';
-import { CardType, CardTheme } from '@/types';
+import { CardType, CardTheme, CardKind } from '@/types';
 import { useCardStore } from '@/stores/useCardStore';
 
 const schema = z.object({
@@ -16,6 +16,7 @@ const schema = z.object({
   expiry_month: z.string().min(1, 'Required').max(2),
   expiry_year: z.string().length(4, 'Enter 4-digit year'),
   card_type: z.enum(['visa', 'mastercard', 'amex']),
+  card_kind: z.enum(['credit', 'debit']),
   theme: z.enum(['green', 'dark', 'brown', 'purple', 'gold']),
   balance: z.coerce.number().min(0),
   credit_limit: z.coerce.number().min(0),
@@ -44,6 +45,7 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
     resolver: zodResolver(schema) as any,
     defaultValues: {
       card_type: 'visa',
+      card_kind: 'credit',
       theme: 'green',
       balance: 0,
       credit_limit: 5000,
@@ -97,12 +99,30 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Card type</label>
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Card network</label>
             <select {...register('card_type')} className="input-base">
               <option value="visa">Visa</option>
               <option value="mastercard">Mastercard</option>
               <option value="amex">American Express</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">Card kind</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(['credit', 'debit'] as CardKind[]).map((k) => (
+                <label key={k} className="cursor-pointer">
+                  <input {...register('card_kind')} type="radio" value={k} className="sr-only" />
+                  <div className={`text-center py-2 rounded-xl border-2 text-sm font-medium transition-all capitalize ${
+                    watchedValues.card_kind === k
+                      ? 'border-[var(--color-accent)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]'
+                      : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-border-hover)]'
+                  }`}>
+                    {k}
+                  </div>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -125,15 +145,17 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid gap-3 ${watchedValues.card_kind === 'debit' ? 'grid-cols-1' : 'grid-cols-2'}`}>
             <div>
               <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Balance ($)</label>
               <input {...register('balance')} type="number" step="0.01" placeholder="0.00" className="input-base" />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Credit limit ($)</label>
-              <input {...register('credit_limit')} type="number" step="0.01" placeholder="5000.00" className="input-base" />
-            </div>
+            {watchedValues.card_kind !== 'debit' && (
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Credit limit ($)</label>
+                <input {...register('credit_limit')} type="number" step="0.01" placeholder="5000.00" className="input-base" />
+              </div>
+            )}
           </div>
 
           <button type="submit" disabled={isLoading} className="btn-primary w-full">

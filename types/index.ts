@@ -11,6 +11,7 @@ export interface User {
 // ─── Card ──────────────────────────────────────────────────────────────────────
 export type CardType = 'visa' | 'mastercard' | 'amex';
 export type CardTheme = 'green' | 'dark' | 'brown' | 'purple' | 'gold';
+export type CardKind = 'credit' | 'debit';
 
 export interface Card {
   id: string;
@@ -20,6 +21,7 @@ export interface Card {
   expiry_month: string;
   expiry_year: string;
   card_type: CardType;
+  card_kind: CardKind;
   theme: CardTheme;
   balance: number;
   credit_limit: number;
