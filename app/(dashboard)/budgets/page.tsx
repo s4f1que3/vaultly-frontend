@@ -82,9 +82,12 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     }
   };
 
+  const defaultKeys = Object.keys(CATEGORY_LABELS) as TransactionCategory[];
   const allCategories = [
-    ...Object.keys(CATEGORY_LABELS) as TransactionCategory[],
-    ...customCategories.map((c) => c.name as TransactionCategory),
+    ...defaultKeys,
+    ...customCategories
+      .filter((c) => !defaultKeys.includes(c.name as TransactionCategory))
+      .map((c) => c.name as TransactionCategory),
   ];
 
   return (
