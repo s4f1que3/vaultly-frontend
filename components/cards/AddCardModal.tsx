@@ -65,17 +65,17 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Card" maxWidth="max-w-2xl">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Live Preview */}
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider self-start">Live Preview</p>
-          <CreditCard card={watchedValues} />
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Card" maxWidth="max-w-lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+        {/* Live preview — centered, mini */}
+        <div className="flex justify-center py-2">
+          <CreditCard card={watchedValues} mini />
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
+        {/* Card holder + last 4 */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-2">
             <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Card holder name</label>
             <input {...register('card_holder')} placeholder="John Doe" className="input-base" />
             {errors.card_holder && <p className="text-[var(--color-danger)] text-xs mt-1">{errors.card_holder.message}</p>}
@@ -87,7 +87,7 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
             {errors.card_number && <p className="text-[var(--color-danger)] text-xs mt-1">{errors.card_number.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Month</label>
               <input {...register('expiry_month')} placeholder="MM" maxLength={2} className="input-base" />
@@ -97,7 +97,10 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
               <input {...register('expiry_year')} placeholder="YYYY" maxLength={4} className="input-base" />
             </div>
           </div>
+        </div>
 
+        {/* Network + Kind */}
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Card network</label>
             <select {...register('card_type')} className="input-base">
@@ -124,45 +127,47 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
               ))}
             </div>
           </div>
+        </div>
 
+        {/* Theme */}
+        <div>
+          <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">Theme</label>
+          <div className="flex gap-2 flex-wrap">
+            {THEMES.map((t) => (
+              <label key={t.value} className="cursor-pointer">
+                <input {...register('theme')} type="radio" value={t.value} className="sr-only" />
+                <div
+                  title={t.label}
+                  style={{ background: t.color }}
+                  className={`w-8 h-8 rounded-lg border-2 transition-all ${
+                    watchedValues.theme === t.value
+                      ? 'border-[var(--color-accent)] scale-110'
+                      : 'border-transparent'
+                  }`}
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Balance + Credit limit */}
+        <div className={`grid gap-3 ${watchedValues.card_kind === 'debit' ? 'grid-cols-1' : 'grid-cols-2'}`}>
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">Theme</label>
-            <div className="flex gap-2 flex-wrap">
-              {THEMES.map((t) => (
-                <label key={t.value} className="cursor-pointer">
-                  <input {...register('theme')} type="radio" value={t.value} className="sr-only" />
-                  <div
-                    title={t.label}
-                    style={{ background: t.color }}
-                    className={`w-8 h-8 rounded-lg border-2 transition-all ${
-                      watchedValues.theme === t.value
-                        ? 'border-[var(--color-accent)] scale-110'
-                        : 'border-transparent'
-                    }`}
-                  />
-                </label>
-              ))}
-            </div>
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Balance ($)</label>
+            <input {...register('balance')} type="number" step="0.01" placeholder="0.00" className="input-base" />
           </div>
-
-          <div className={`grid gap-3 ${watchedValues.card_kind === 'debit' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+          {watchedValues.card_kind !== 'debit' && (
             <div>
-              <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Balance ($)</label>
-              <input {...register('balance')} type="number" step="0.01" placeholder="0.00" className="input-base" />
+              <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Credit limit ($)</label>
+              <input {...register('credit_limit')} type="number" step="0.01" placeholder="5000.00" className="input-base" />
             </div>
-            {watchedValues.card_kind !== 'debit' && (
-              <div>
-                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Credit limit ($)</label>
-                <input {...register('credit_limit')} type="number" step="0.01" placeholder="5000.00" className="input-base" />
-              </div>
-            )}
-          </div>
+          )}
+        </div>
 
-          <button type="submit" disabled={isLoading} className="btn-primary w-full">
-            {isLoading ? <><Loader2 size={16} className="animate-spin" /> Adding...</> : 'Add Card'}
-          </button>
-        </form>
-      </div>
+        <button type="submit" disabled={isLoading} className="btn-primary w-full">
+          {isLoading ? <><Loader2 size={16} className="animate-spin" /> Adding...</> : 'Add Card'}
+        </button>
+      </form>
     </Modal>
   );
 }
