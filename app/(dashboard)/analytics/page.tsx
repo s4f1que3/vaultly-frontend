@@ -213,16 +213,29 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Budget vs Actual (Radar)</h2>
-          {radarData.length === 0 ? (
-            <div className="h-48 flex items-center justify-center text-[var(--color-text-muted)] text-sm">Set budgets to see radar chart</div>
+          {radarData.length < 3 ? (
+            <div className="h-48 flex flex-col items-center justify-center gap-2 text-center">
+              <span className="text-2xl">📊</span>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                {radarData.length === 0 ? 'Set budgets to see radar chart' : 'Add at least 3 budgets to see the radar chart'}
+              </p>
+            </div>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
-              <RadarChart data={radarData}>
+            <ResponsiveContainer width="100%" height={320}>
+              <RadarChart
+                data={radarData}
+                margin={{ top: 20, right: 40, bottom: 20, left: 40 }}
+                outerRadius="62%"
+              >
                 <PolarGrid stroke="rgba(255,255,255,0.06)" />
-                <PolarAngleAxis dataKey="category" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
+                <PolarAngleAxis
+                  dataKey="category"
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
+                  tickSize={8}
+                />
                 <Radar name="Budget" dataKey="budget" stroke="#57c93c" fill="#57c93c" fillOpacity={0.15} strokeWidth={1.5} />
                 <Radar name="Spent" dataKey="spent" stroke="#ef4444" fill="#ef4444" fillOpacity={0.15} strokeWidth={1.5} />
-                <Legend wrapperStyle={{ fontSize: 12, color: 'var(--color-text-muted)' }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: 'var(--color-text-muted)', paddingTop: 8 }} />
                 <Tooltip {...CHART_TOOLTIP_STYLE} formatter={(v: unknown) => formatCurrency(v as number)} />
               </RadarChart>
             </ResponsiveContainer>

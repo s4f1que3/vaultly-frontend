@@ -59,6 +59,7 @@ export interface TransactionFilters {
   dateTo?: string;
   search?: string;
   cardId?: string;
+  merchant?: string;
   page?: number;
   limit?: number;
 }

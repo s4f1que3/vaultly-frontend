@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Star, MoreVertical } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
@@ -14,6 +15,7 @@ export default function CardsPage() {
   const { cards, isLoading, fetchCards, deleteCard, setDefault } = useCardStore();
   const [showAdd, setShowAdd] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => { fetchCards(); }, [fetchCards]);
 
@@ -68,7 +70,8 @@ export default function CardsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="card p-5 relative"
+                className="card p-5 relative cursor-pointer"
+                onClick={() => router.push(`/cards/${card.id}`)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -83,7 +86,7 @@ export default function CardsPage() {
                     <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Balance</p>
                     <p className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(card.balance)}</p>
                   </div>
-                  <div className="relative">
+                  <div className="relative" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => setMenuOpen(menuOpen === card.id ? null : card.id)}
                       className="p-2 rounded-lg hover:bg-[var(--color-surface-2)] text-[var(--color-text-muted)]"
