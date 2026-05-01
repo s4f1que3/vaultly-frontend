@@ -30,7 +30,7 @@ interface Props {
 
 const CATEGORIES: TransactionCategory[] = [
   'food', 'transport', 'shopping', 'entertainment', 'health',
-  'utilities', 'housing', 'education', 'salary', 'investment', 'transfer', 'other',
+  'utilities', 'housing', 'education', 'salary', 'investment', 'transfer', 'other', 'general',
 ];
 
 export default function TransactionModal({ isOpen, onClose, transaction }: Props) {
