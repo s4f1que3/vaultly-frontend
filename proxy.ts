@@ -7,6 +7,7 @@ const AUTH_ONLY_ROUTES = ['/login', '/signup', '/forgot-password'];
 
 // Routes anyone can access regardless of auth state
 const OPEN_ROUTES = [
+  '/',
   '/subscribe',
   '/license',
   '/license/purchase',
