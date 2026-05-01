@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, User, KeyRound, ArrowLeft, Loader2, Check } from 'lucide-react';
+import Footer from '@/components/ui/Footer';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -39,6 +40,7 @@ export default function LicenseSignupPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -76,6 +78,10 @@ export default function LicenseSignupPage() {
   const onSubmit = async (data: FormData) => {
     if (!keyValid) {
       setError('Please validate your license key first');
+      return;
+    }
+    if (!agreedToTerms) {
+      setError('You must agree to the Terms & Conditions to continue.');
       return;
     }
     setError('');
@@ -246,6 +252,7 @@ export default function LicenseSignupPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -348,6 +355,28 @@ export default function LicenseSignupPage() {
               {errors.license_key && <p className="text-xs text-[var(--color-danger)] mt-1">{errors.license_key.message}</p>}
             </div>
 
+            {/* Terms checkbox */}
+            <label className="flex items-start gap-2.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-[var(--color-border)] bg-[var(--color-surface-2)] accent-[var(--color-accent)] cursor-pointer"
+              />
+              <span className="text-xs text-[var(--color-text-muted)] leading-relaxed group-hover:text-[var(--color-text-secondary)] transition-colors">
+                I agree to the{' '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-[var(--color-accent)] hover:underline"
+                >
+                  Terms &amp; Conditions
+                </a>
+              </span>
+            </label>
+
             {error && (
               <div className="bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] rounded-xl p-3 text-sm text-[var(--color-danger)]">
                 {error}
@@ -356,7 +385,7 @@ export default function LicenseSignupPage() {
 
             <button
               type="submit"
-              disabled={isLoading || !keyValid}
+              disabled={isLoading || !keyValid || !agreedToTerms}
               className="btn-primary w-full flex items-center justify-center gap-2"
             >
               {isLoading ? (
@@ -380,5 +409,7 @@ export default function LicenseSignupPage() {
         </div>
       </motion.div>
     </div>
+    <Footer />
+    </>
   );
 }
