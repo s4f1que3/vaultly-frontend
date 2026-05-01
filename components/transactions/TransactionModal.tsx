@@ -144,7 +144,7 @@ export default function TransactionModal({ isOpen, onClose, transaction }: Props
         <div>
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Category</label>
           <select {...register('category')} className="input-base">
-            {[...DEFAULT_CATEGORIES, ...customCategories.map((c) => c.name as TransactionCategory)].map((c) => (
+            {[...DEFAULT_CATEGORIES, ...customCategories.filter((c) => !DEFAULT_CATEGORIES.includes(c.name as TransactionCategory)).map((c) => c.name as TransactionCategory)].map((c) => (
               <option key={c} value={c}>
                 {(CATEGORY_ICONS as Record<string, string>)[c] || '📦'}{' '}
                 {(CATEGORY_LABELS as Record<string, string>)[c] || c}

@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { useSubscriptionStore } from '@/stores/useSubscriptionStore';
 import { useCardStore } from '@/stores/useCardStore';
 import { Subscription } from '@/types';
+import { createClient } from '@/lib/supabase/client';
 
 const PRESET_ICONS = ['🎬', '🎵', '📦', '🍎', '📺', '🎮', '☁️', '🔒', '📰', '💼', '🏋️', '📱'];
 
@@ -27,6 +28,10 @@ type FormData = z.infer<typeof schema>;
 const COLORS = ['#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6', '#10b981', '#06b6d4', '#f97316', '#ef4444', '#57c93c'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+function isImageUrl(value?: string) {
+  return !!value && (value.startsWith('https://') || value.startsWith('http://') || value.startsWith('data:'));
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -37,6 +42,11 @@ export default function SubscriptionModal({ isOpen, onClose, subscription }: Pro
   const { addSubscription, updateSubscription } = useSubscriptionStore();
   const { cards, fetchCards } = useCardStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [iconMode, setIconMode] = useState<'emoji' | 'image'>('emoji');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = !!subscription;
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
@@ -48,6 +58,11 @@ export default function SubscriptionModal({ isOpen, onClose, subscription }: Pro
 
   useEffect(() => {
     if (subscription) {
+      const hasImage = isImageUrl(subscription.icon);
+      setIconMode(hasImage ? 'image' : 'emoji');
+      setImagePreview(hasImage ? subscription.icon! : null);
+      setImageFile(null);
+      setUploadError(null);
       reset({
         company: subscription.company,
         amount: subscription.amount,
@@ -59,24 +74,97 @@ export default function SubscriptionModal({ isOpen, onClose, subscription }: Pro
         color: subscription.color || '#57c93c',
       });
     } else {
+      setIconMode('emoji');
+      setImagePreview(null);
+      setImageFile(null);
+      setUploadError(null);
       reset({ period: 'monthly', billing_day: 1, icon: '💳', color: '#57c93c' });
     }
-  }, [subscription, reset]);
+  }, [subscription, reset, isOpen]);
 
   const period = watch('period');
   const selectedColor = watch('color');
   const selectedIcon = watch('icon');
 
+  function switchToEmoji() {
+    setIconMode('emoji');
+    setImagePreview(null);
+    setImageFile(null);
+    setUploadError(null);
+    // Restore to last emoji or default
+    if (isImageUrl(selectedIcon)) setValue('icon', '💳');
+  }
+
+  function switchToImage() {
+    setIconMode('image');
+    setValue('icon', '');
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please select an image file.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError('Image must be under 2MB.');
+      return;
+    }
+    setUploadError(null);
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  function clearImage() {
+    setImageFile(null);
+    setImagePreview(null);
+    setValue('icon', '');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  async function uploadImage(file: File): Promise<string> {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+    const ext = file.name.split('.').pop() ?? 'png';
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from('subscription-icons')
+      .upload(path, file, { upsert: true });
+    if (error) throw new Error(error.message);
+    const { data } = supabase.storage.from('subscription-icons').getPublicUrl(path);
+    return data.publicUrl;
+  }
+
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
+    setUploadError(null);
     try {
-      const payload = { ...data, card_id: data.card_id || undefined };
+      let icon = data.icon;
+
+      if (iconMode === 'image') {
+        if (imageFile) {
+          icon = await uploadImage(imageFile);
+        } else if (imagePreview && isImageUrl(imagePreview)) {
+          // Keep existing image URL (editing without changing image)
+          icon = imagePreview;
+        } else {
+          icon = '💳'; // fallback if nothing uploaded
+        }
+      }
+
+      const payload = { ...data, icon, card_id: data.card_id || undefined };
       if (isEdit && subscription) {
         await updateSubscription(subscription.id, payload);
       } else {
         await addSubscription(payload);
       }
       onClose();
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsLoading(false);
     }
@@ -86,36 +174,114 @@ export default function SubscriptionModal({ isOpen, onClose, subscription }: Pro
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Subscription' : 'Add Subscription'}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-        {/* Icon + Color picker */}
+        {/* Icon section */}
         <div>
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">Icon</label>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {PRESET_ICONS.map(icon => (
-              <button
-                key={icon}
-                type="button"
-                onClick={() => setValue('icon', icon)}
-                className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all border ${
-                  selectedIcon === icon
-                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-dim)] scale-110'
-                    : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
-                }`}
-              >
-                {icon}
-              </button>
-            ))}
+
+          {/* Mode toggle */}
+          <div className="flex gap-1 p-1 rounded-lg bg-[var(--color-surface-3)] mb-3 w-fit">
+            <button
+              type="button"
+              onClick={switchToEmoji}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                iconMode === 'emoji'
+                  ? 'bg-[var(--color-surface-1)] text-[var(--color-text-primary)] shadow-sm'
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+              }`}
+            >
+              Emoji
+            </button>
+            <button
+              type="button"
+              onClick={switchToImage}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                iconMode === 'image'
+                  ? 'bg-[var(--color-surface-1)] text-[var(--color-text-primary)] shadow-sm'
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+              }`}
+            >
+              Upload Image
+            </button>
           </div>
-          <div className="flex gap-2">
-            {COLORS.map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setValue('color', c)}
-                className={`w-6 h-6 rounded-full transition-all ${selectedColor === c ? 'ring-2 ring-white ring-offset-2 ring-offset-[var(--color-surface-2)] scale-110' : ''}`}
-                style={{ background: c }}
+
+          {iconMode === 'emoji' && (
+            <>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {PRESET_ICONS.map(icon => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setValue('icon', icon)}
+                    className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all border ${
+                      selectedIcon === icon
+                        ? 'border-[var(--color-accent)] bg-[var(--color-accent-dim)] scale-110'
+                        : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                {COLORS.map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setValue('color', c)}
+                    className={`w-6 h-6 rounded-full transition-all ${selectedColor === c ? 'ring-2 ring-white ring-offset-2 ring-offset-[var(--color-surface-2)] scale-110' : ''}`}
+                    style={{ background: c }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {iconMode === 'image' && (
+            <div>
+              {imagePreview ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-3)] flex items-center justify-center shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imagePreview} alt="icon preview" className="w-full h-full object-contain p-1" />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-xs text-[var(--color-accent)] hover:underline text-left"
+                    >
+                      Change image
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="text-xs text-[var(--color-danger)] hover:underline text-left flex items-center gap-1"
+                    >
+                      <X size={10} /> Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-24 rounded-xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-accent)] flex flex-col items-center justify-center gap-2 transition-colors text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]"
+                >
+                  <Upload size={20} />
+                  <span className="text-xs font-medium">Click to upload logo</span>
+                  <span className="text-[10px]">PNG, JPG, SVG · max 2MB</span>
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
               />
-            ))}
-          </div>
+              {uploadError && <p className="text-[var(--color-danger)] text-xs mt-2">{uploadError}</p>}
+            </div>
+          )}
         </div>
 
         {/* Company */}

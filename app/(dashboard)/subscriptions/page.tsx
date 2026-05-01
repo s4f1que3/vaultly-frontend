@@ -143,10 +143,19 @@ export default function SubscriptionsPage() {
                 >
                   {/* Icon */}
                   <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
-                    style={{ background: `${sub.color ?? '#57c93c'}22`, border: `1px solid ${sub.color ?? '#57c93c'}44` }}
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
+                    style={
+                      sub.icon?.startsWith('http') || sub.icon?.startsWith('data:')
+                        ? { border: `1px solid ${sub.color ?? '#57c93c'}44` }
+                        : { background: `${sub.color ?? '#57c93c'}22`, border: `1px solid ${sub.color ?? '#57c93c'}44` }
+                    }
                   >
-                    {sub.icon ?? '💳'}
+                    {sub.icon?.startsWith('http') || sub.icon?.startsWith('data:') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={sub.icon} alt={sub.company} className="w-full h-full object-contain p-1.5" />
+                    ) : (
+                      sub.icon ?? '💳'
+                    )}
                   </div>
 
                   {/* Info */}
