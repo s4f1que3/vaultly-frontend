@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Transaction, TransactionFilters, PaginatedResponse } from '@/types';
 import api from '@/lib/api';
+import { useBudgetStore } from '@/stores/useBudgetStore';
 
 interface TransactionState {
   transactions: Transaction[];
@@ -58,6 +59,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       set((state) => ({
         transactions: state.transactions.map((t) => t.id === tempId ? created : t),
       }));
+      useBudgetStore.getState().fetchBudgets();
       return created;
     } catch (err) {
       set((state) => ({ transactions: state.transactions.filter((t) => t.id !== tempId) }));
@@ -72,6 +74,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     }));
     try {
       await api.patch(`/transactions/${id}`, data);
+      useBudgetStore.getState().fetchBudgets();
     } catch (err) {
       set({ transactions: prev });
       throw err;
@@ -83,6 +86,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     set((state) => ({ transactions: state.transactions.filter((t) => t.id !== id) }));
     try {
       await api.delete(`/transactions/${id}`);
+      useBudgetStore.getState().fetchBudgets();
     } catch (err) {
       set({ transactions: prev });
       throw err;
