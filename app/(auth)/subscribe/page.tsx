@@ -291,23 +291,21 @@ export default function SubscribePage() {
           <p className="text-[var(--color-text-secondary)] text-sm max-w-md mx-auto">
             Full access to every Vaultly feature. Cancel anytime, no questions asked.
           </p>
-          {(authFlow === 'create_account' || authFlow === 'verify_otp') && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-sm text-[var(--color-text-secondary)] mt-3"
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-sm text-[var(--color-text-secondary)] mt-3"
+          >
+            Already have an account?{' '}
+            <Link
+              href="/login"
+              className="text-[var(--color-accent)] font-medium hover:underline inline-flex items-center gap-1"
             >
-              Already have an account?{' '}
-              <Link
-                href="/login"
-                className="text-[var(--color-accent)] font-medium hover:underline inline-flex items-center gap-1"
-              >
-                <LogIn size={13} />
-                Log in
-              </Link>
-            </motion.p>
-          )}
+              <LogIn size={13} />
+              Log in
+            </Link>
+          </motion.p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
