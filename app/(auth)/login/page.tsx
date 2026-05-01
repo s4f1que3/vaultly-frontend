@@ -43,8 +43,8 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] dot-pattern px-4">
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg)] dot-pattern">
+    <div className="flex-1 flex items-center justify-center px-4">
       {/* Green ambient glow */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[var(--color-accent)] opacity-5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -171,6 +171,6 @@ export default function LoginPage() {
       </motion.div>
     </div>
     <Footer />
-    </>
+    </div>
   );
 }

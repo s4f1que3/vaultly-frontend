@@ -9,6 +9,7 @@ const AUTH_ONLY_ROUTES = ['/login', '/signup', '/forgot-password'];
 const OPEN_ROUTES = [
   '/',
   '/subscribe',
+  '/terms',
   '/license',
   '/license/purchase',
   '/license/success',

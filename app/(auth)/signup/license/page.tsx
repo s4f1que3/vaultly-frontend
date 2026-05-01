@@ -252,8 +252,8 @@ export default function LicenseSignupPage() {
   }
 
   return (
-    <>
-    <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg)]">
+    <div className="flex-1 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -410,6 +410,6 @@ export default function LicenseSignupPage() {
       </motion.div>
     </div>
     <Footer />
-    </>
+    </div>
   );
 }
