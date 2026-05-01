@@ -24,8 +24,9 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
   fetchCategories: async () => {
     if (get().isLoaded) return;
     try {
-      const res = await api.get('/categories');
-      const all: Array<{ name: string; icon: string; color: string; is_default: boolean }> = res.data ?? [];
+      type CategoryRow = { name: string; icon: string; color: string; is_default: boolean };
+      const res = await api.get<{ data: CategoryRow[] }>('/categories');
+      const all = res.data ?? [];
 
       const custom = all.filter((c) => !c.is_default).map((c) => ({
         name: c.name,
