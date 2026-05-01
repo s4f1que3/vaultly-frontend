@@ -10,11 +10,3 @@ export default function BillingSuccessPage() {
     </Suspense>
   );
 }
-              Try again
-            </button>
-          </motion.div>
-        )}
-      </motion.div>
-    </div>
-  );
-}
