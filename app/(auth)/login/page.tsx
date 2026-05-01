@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import Footer from '@/components/ui/Footer';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -42,6 +43,7 @@ export default function LoginPage() {
   };
 
   return (
+    <>
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] dot-pattern px-4">
       {/* Green ambient glow */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[var(--color-accent)] opacity-5 blur-[120px] rounded-full pointer-events-none" />
@@ -168,5 +170,7 @@ export default function LoginPage() {
         </p>
       </motion.div>
     </div>
+    <Footer />
+    </>
   );
 }

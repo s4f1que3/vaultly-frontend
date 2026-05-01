@@ -8,6 +8,7 @@ import {
   ArrowRight, RefreshCw, User, Mail, Lock, Eye, EyeOff, LogIn,
 } from 'lucide-react';
 import Link from 'next/link';
+import Footer from '@/components/ui/Footer';
 import { createClient } from '@/lib/supabase/client';
 import { useBillingStore } from '@/stores/useBillingStore';
 import { useOtpRateLimit } from '@/hooks/useOtpRateLimit';
@@ -46,7 +47,6 @@ const PLANS = [
     name: 'Yearly',
     price: 100,
     period: '/yr',
-    badge: 'Save $16',
     description: 'Billed once per year',
   },
 ];
@@ -60,6 +60,7 @@ export default function SubscribePage() {
   const [sdkReady, setSdkReady] = useState(false);
   const [error, setError] = useState('');
   const [isActivating, setIsActivating] = useState(false);
+  const [paypalRenderKey, setPaypalRenderKey] = useState(0);
   const paypalRef = useRef<HTMLDivElement>(null);
   const buttonsInstance = useRef<{ close: () => void } | null>(null);
 
@@ -76,6 +77,7 @@ export default function SubscribePage() {
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const rateLimit = useOtpRateLimit(signupEmail);
 
   // Check auth state on mount
@@ -155,6 +157,7 @@ export default function SubscribePage() {
         } catch (err) {
           setError(err instanceof Error ? err.message : 'Activation failed. Please contact support.');
           setIsActivating(false);
+          setPaypalRenderKey((k) => k + 1);
         }
       },
 
@@ -178,7 +181,7 @@ export default function SubscribePage() {
     return () => {
       buttons.close?.();
     };
-  }, [sdkReady, selectedPlan, authFlow]);
+  }, [sdkReady, selectedPlan, authFlow, paypalRenderKey]);
 
   const handleCreateAccount = async () => {
     setAuthError('');
@@ -192,6 +195,10 @@ export default function SubscribePage() {
     }
     if (!signupPassword || signupPassword.length < 8) {
       setAuthError('Password must be at least 8 characters');
+      return;
+    }
+    if (!agreedToTerms) {
+      setAuthError('You must agree to the Terms & Conditions to continue.');
       return;
     }
 
@@ -258,6 +265,7 @@ export default function SubscribePage() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -430,6 +438,28 @@ export default function SubscribePage() {
                     </button>
                   </div>
 
+                  {/* Terms checkbox */}
+                  <label className="flex items-start gap-2.5 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-[var(--color-border)] bg-[var(--color-surface-2)] accent-[var(--color-accent)] cursor-pointer"
+                    />
+                    <span className="text-xs text-[var(--color-text-muted)] leading-relaxed group-hover:text-[var(--color-text-secondary)] transition-colors">
+                      I agree to the{' '}
+                      <a
+                        href="/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[var(--color-accent)] hover:underline"
+                      >
+                        Terms &amp; Conditions
+                      </a>
+                    </span>
+                  </label>
+
                   {authError && (
                     <div className="flex items-start gap-2 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] rounded-xl p-3 text-sm text-[var(--color-danger)]">
                       <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
@@ -439,7 +469,7 @@ export default function SubscribePage() {
 
                   <button
                     onClick={handleCreateAccount}
-                    disabled={isCreatingAccount}
+                    disabled={isCreatingAccount || !agreedToTerms}
                     className="btn-primary w-full text-sm"
                   >
                     {isCreatingAccount
@@ -664,5 +694,7 @@ export default function SubscribePage() {
         </div>
       </motion.div>
     </div>
+    <Footer />
+    </>
   );
 }
