@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, CreditCard, ArrowLeftRight, Target,
-  PiggyBank, BarChart3, Bell, Settings, LogOut, RefreshCw, History, Wallet, Store
+  PiggyBank, BarChart3, Bell, Settings, LogOut, RefreshCw, History, Wallet
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/stores/useNotificationStore';
@@ -19,7 +19,6 @@ import api from '@/lib/api';
 const NAV_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
-  { href: '/merchants', icon: Store, label: 'Merchants' },
   { href: '/cards', icon: CreditCard, label: 'Cards' },
   { href: '/budgets', icon: PiggyBank, label: 'Budgets' },
   { href: '/analytics', icon: BarChart3, label: 'Analytics' },
