@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, AlertTriangle, Pencil } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Pencil, ChevronDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import Modal from '@/components/ui/Modal';
 import { useBudgetStore } from '@/stores/useBudgetStore';
+import { useCategoryStore } from '@/stores/useCategoryStore';
 import { Budget, TransactionCategory } from '@/types';
 import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS, formatCurrency, formatPercentage } from '@/lib/utils/formatters';
 
@@ -21,14 +22,20 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as TransactionCategory[];
-
 function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: () => void; budget?: Budget | null }) {
   const { addBudget, updateBudget } = useBudgetStore();
+  const { customCategories, fetchCategories, createCategory } = useCategoryStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCatLabel, setNewCatLabel] = useState('');
+  const [newCatEmoji, setNewCatEmoji] = useState('');
+  const [catError, setCatError] = useState('');
+  const [creatingCat, setCreatingCat] = useState(false);
   const isEdit = !!budget;
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
     defaultValues: { category: 'food', period: 'monthly', alert_threshold: 80 },
@@ -40,7 +47,25 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     } else {
       reset({ category: 'food', period: 'monthly', alert_threshold: 80 });
     }
-  }, [budget, reset]);
+    setShowNewCategory(false);
+    setNewCatLabel(''); setNewCatEmoji(''); setCatError('');
+  }, [budget, reset, isOpen]);
+
+  const handleCreateCategory = async () => {
+    if (!newCatLabel.trim()) { setCatError('Name is required'); return; }
+    if (!newCatEmoji.trim()) { setCatError('Emoji is required'); return; }
+    setCreatingCat(true); setCatError('');
+    try {
+      const slug = await createCategory(newCatLabel.trim(), newCatEmoji.trim());
+      setValue('category', slug);
+      setShowNewCategory(false);
+      setNewCatLabel(''); setNewCatEmoji('');
+    } catch (e: unknown) {
+      setCatError(e instanceof Error ? e.message : 'Failed to create category');
+    } finally {
+      setCreatingCat(false);
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
@@ -57,15 +82,83 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     }
   };
 
+  const allCategories = [
+    ...Object.keys(CATEGORY_LABELS) as TransactionCategory[],
+    ...customCategories.map((c) => c.name as TransactionCategory),
+  ];
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Budget' : 'Create Budget'}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Category</label>
-          <select {...register('category')} disabled={isEdit} className={`input-base ${isEdit ? 'opacity-50 cursor-not-allowed' : ''}`}>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_ICONS[c]} {CATEGORY_LABELS[c]}</option>)}
+          <select
+            {...register('category')}
+            disabled={isEdit}
+            className={`input-base ${isEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {allCategories.map((c) => (
+              <option key={c} value={c}>
+                {(CATEGORY_ICONS as Record<string, string>)[c] || '📦'}{' '}
+                {(CATEGORY_LABELS as Record<string, string>)[c] || c}
+              </option>
+            ))}
           </select>
+
+          {/* Create custom category */}
+          {!isEdit && (
+            <div className="mt-2">
+              {!showNewCategory ? (
+                <button
+                  type="button"
+                  onClick={() => setShowNewCategory(true)}
+                  className="text-xs text-[var(--color-accent)] hover:underline flex items-center gap-1"
+                >
+                  <Plus size={11} /> Create custom category
+                </button>
+              ) : (
+                <div className="mt-2 p-3 bg-[var(--color-surface-2)] rounded-xl space-y-2">
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">New category</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="😊"
+                      value={newCatEmoji}
+                      onChange={(e) => setNewCatEmoji(e.target.value)}
+                      className="input-base w-16 text-center text-lg"
+                      maxLength={4}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Category name"
+                      value={newCatLabel}
+                      onChange={(e) => setNewCatLabel(e.target.value)}
+                      className="input-base flex-1 text-sm"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateCategory())}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateCategory}
+                      disabled={creatingCat}
+                      className="btn-primary px-3 text-xs flex-shrink-0"
+                    >
+                      {creatingCat ? <Loader2 size={13} className="animate-spin" /> : 'Add'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowNewCategory(false); setCatError(''); }}
+                      className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  {catError && <p className="text-xs text-[var(--color-danger)]">{catError}</p>}
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
         <div>
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Budget limit ($)</label>
           <input {...register('limit_amount')} type="number" step="0.01" placeholder="500.00" className="input-base" />
@@ -99,9 +192,12 @@ export default function BudgetsPage() {
 
   useEffect(() => { fetchBudgets(); }, [fetchBudgets]);
 
-  const totalBudgeted = budgets.reduce((s, b) => s + b.limit_amount, 0);
+  const totalBudgeted = budgets.reduce((s, b) => s + b.limit_amount + (b.income_amount ?? 0), 0);
   const totalSpent = budgets.reduce((s, b) => s + b.spent_amount, 0);
-  const alertCount = budgets.filter((b) => b.limit_amount > 0 && (b.spent_amount / b.limit_amount) * 100 >= b.alert_threshold).length;
+  const alertCount = budgets.filter((b) => {
+    const effective = b.limit_amount + (b.income_amount ?? 0);
+    return effective > 0 && (b.spent_amount / effective) * 100 >= b.alert_threshold;
+  }).length;
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -153,10 +249,11 @@ export default function BudgetsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AnimatePresence>
             {budgets.map((b, i) => {
-              const pct = b.limit_amount > 0 ? Math.min((b.spent_amount / b.limit_amount) * 100, 100) : 0;
+              const effectiveLimit = b.limit_amount + (b.income_amount ?? 0);
+              const pct = effectiveLimit > 0 ? Math.min((b.spent_amount / effectiveLimit) * 100, 100) : 0;
               const isAlert = pct >= b.alert_threshold;
               const isOver = pct >= 100;
-              const remaining = b.limit_amount - b.spent_amount;
+              const remaining = effectiveLimit - b.spent_amount;
 
               return (
                 <motion.div
@@ -208,7 +305,10 @@ export default function BudgetsPage() {
 
                   <div className="flex justify-between items-center">
                     <p className="text-xs text-[var(--color-text-muted)]">
-                      <span className="font-medium text-[var(--color-text-primary)]">{formatCurrency(b.spent_amount)}</span> of {formatCurrency(b.limit_amount)}
+                      <span className="font-medium text-[var(--color-text-primary)]">{formatCurrency(b.spent_amount)}</span> of {formatCurrency(effectiveLimit)}
+                      {(b.income_amount ?? 0) > 0 && (
+                        <span className="text-[var(--color-accent)] ml-1">(+{formatCurrency(b.income_amount)} income)</span>
+                      )}
                     </p>
                     <p className={`text-xs font-semibold ${remaining < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-secondary)]'}`}>
                       {remaining < 0 ? 'Over by ' : ''}{formatCurrency(Math.abs(remaining))} {remaining >= 0 ? 'left' : ''}

@@ -36,6 +36,8 @@ export type TransactionCategory =
   | 'utilities' | 'housing' | 'education' | 'salary' | 'investment'
   | 'transfer' | 'other' | 'general';
 
+export type BudgetImpact = 'increase' | 'decrease' | 'none';
+
 export interface Transaction {
   id: string;
   user_id: string;
@@ -46,6 +48,7 @@ export interface Transaction {
   description: string;
   merchant?: string;
   date: string;
+  budget_impact?: BudgetImpact;
   created_at: string;
 }
 
@@ -67,6 +70,7 @@ export interface Budget {
   category: TransactionCategory;
   limit_amount: number;
   spent_amount: number;
+  income_amount: number;
   period: 'monthly' | 'weekly' | 'yearly';
   alert_threshold: number; // percentage (e.g. 80)
   created_at: string;

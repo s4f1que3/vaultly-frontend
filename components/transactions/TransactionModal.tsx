@@ -8,8 +8,9 @@ import { Loader2 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { useTransactionStore } from '@/stores/useTransactionStore';
 import { useCardStore } from '@/stores/useCardStore';
-import { Transaction, TransactionCategory } from '@/types';
-import { CATEGORY_LABELS } from '@/lib/utils/formatters';
+import { Transaction, TransactionCategory, BudgetImpact } from '@/types';
+import { CATEGORY_LABELS, CATEGORY_ICONS } from '@/lib/utils/formatters';
+import { useCategoryStore } from '@/stores/useCategoryStore';
 
 const schema = z.object({
   amount: z.coerce.number().positive('Amount must be positive'),
@@ -19,6 +20,7 @@ const schema = z.object({
   merchant: z.string().optional(),
   date: z.string().min(1, 'Required'),
   card_id: z.string().optional(),
+  budget_impact: z.enum(['increase', 'decrease', 'none']).optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -28,7 +30,7 @@ interface Props {
   transaction?: Transaction | null;
 }
 
-const CATEGORIES: TransactionCategory[] = [
+const DEFAULT_CATEGORIES: TransactionCategory[] = [
   'food', 'transport', 'shopping', 'entertainment', 'health',
   'utilities', 'housing', 'education', 'salary', 'investment', 'transfer', 'other', 'general',
 ];
@@ -36,6 +38,7 @@ const CATEGORIES: TransactionCategory[] = [
 export default function TransactionModal({ isOpen, onClose, transaction }: Props) {
   const { addTransaction, updateTransaction } = useTransactionStore();
   const { cards, fetchCards } = useCardStore();
+  const { customCategories, fetchCategories } = useCategoryStore();
   const [isLoading, setIsLoading] = useState(false);
   const isEdit = !!transaction;
 
@@ -46,12 +49,14 @@ export default function TransactionModal({ isOpen, onClose, transaction }: Props
       type: 'expense',
       category: 'food',
       date: new Date().toISOString().split('T')[0],
+      budget_impact: 'none',
     },
   });
 
   useEffect(() => {
     fetchCards();
-  }, [fetchCards]);
+    fetchCategories();
+  }, [fetchCards, fetchCategories]);
 
   useEffect(() => {
     if (transaction) {
@@ -63,6 +68,7 @@ export default function TransactionModal({ isOpen, onClose, transaction }: Props
         merchant: transaction.merchant || '',
         date: transaction.date.split('T')[0],
         card_id: transaction.card_id || '',
+        budget_impact: transaction.budget_impact || 'none',
       });
     } else {
       reset({ type: 'expense', category: 'food', date: new Date().toISOString().split('T')[0] });
@@ -138,11 +144,44 @@ export default function TransactionModal({ isOpen, onClose, transaction }: Props
         <div>
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Category</label>
           <select {...register('category')} className="input-base">
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+            {[...DEFAULT_CATEGORIES, ...customCategories.map((c) => c.name as TransactionCategory)].map((c) => (
+              <option key={c} value={c}>
+                {(CATEGORY_ICONS as Record<string, string>)[c] || '📦'}{' '}
+                {(CATEGORY_LABELS as Record<string, string>)[c] || c}
+              </option>
             ))}
           </select>
         </div>
+
+        {/* Budget impact — transfers only */}
+        {watch('type') === 'transfer' && (
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">
+              Budget impact
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { value: 'increase', label: '↑ Increase', activeClass: 'border-[rgba(87,201,60,0.6)] bg-[rgba(87,201,60,0.1)] text-[var(--color-accent)]' },
+                { value: 'decrease', label: '↓ Decrease', activeClass: 'border-[rgba(239,68,68,0.6)] bg-[rgba(239,68,68,0.1)] text-[var(--color-danger)]' },
+                { value: 'none',     label: '— None',     activeClass: 'border-[rgba(156,149,133,0.6)] bg-[rgba(156,149,133,0.1)] text-[var(--color-text-secondary)]' },
+              ] as { value: BudgetImpact; label: string; activeClass: string }[]).map(({ value, label, activeClass }) => (
+                <label key={value} className="cursor-pointer">
+                  <input {...register('budget_impact')} type="radio" value={value} className="sr-only" />
+                  <div className={`text-center py-2 rounded-lg border text-xs font-medium transition-all ${
+                    watch('budget_impact') === value
+                      ? activeClass
+                      : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-border-hover)]'
+                  }`}>
+                    {label}
+                  </div>
+                </label>
+              ))}
+            </div>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5">
+              How should this transfer affect the selected category&apos;s budget?
+            </p>
+          </div>
+        )}
 
         {/* Merchant + Date */}
         <div className="grid grid-cols-2 gap-3">
