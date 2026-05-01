@@ -52,7 +52,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
   },
 
   createCategory: async (label: string, emoji: string) => {
-    const res = await api.post('/categories', { label, emoji });
+    const res = await api.post<{ slug: string; label: string; color: string }>('/categories', { label, emoji });
     const { slug, label: displayLabel, color } = res;
 
     const newCat: CustomCategory = { name: slug, label: displayLabel, emoji, color, is_default: false };
