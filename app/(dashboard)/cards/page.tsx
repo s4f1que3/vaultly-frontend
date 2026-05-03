@@ -3,17 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Star, MoreVertical } from 'lucide-react';
+import { Plus, Trash2, Star, MoreVertical, Pencil } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import CreditCard from '@/components/cards/CreditCard';
 import AddCardModal from '@/components/cards/AddCardModal';
+import EditCardModal from '@/components/cards/EditCardModal';
 import { useCardStore } from '@/stores/useCardStore';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { CardSkeleton } from '@/components/ui/Skeleton';
+import { Card } from '@/types';
 
 export default function CardsPage() {
   const { cards, isLoading, fetchCards, deleteCard, setDefault } = useCardStore();
   const [showAdd, setShowAdd] = useState(false);
+  const [editCard, setEditCard] = useState<Card | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const router = useRouter();
 
@@ -23,7 +26,7 @@ export default function CardsPage() {
   const defaultCard = cards.find((c) => c.is_default);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-5xl mx-auto">
       <PageHeader
         title="My Cards"
         subtitle={`${cards.length} card${cards.length !== 1 ? 's' : ''} · Total balance ${formatCurrency(totalBalance)}`}
@@ -99,6 +102,12 @@ export default function CardsPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="absolute right-0 top-10 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl p-1 z-10 min-w-[140px] shadow-xl"
                       >
+                        <button
+                          onClick={() => { setEditCard(card); setMenuOpen(null); }}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] w-full rounded-lg"
+                        >
+                          <Pencil size={14} /> Edit card
+                        </button>
                         {!card.is_default && (
                           <button
                             onClick={() => { setDefault(card.id); setMenuOpen(null); }}
@@ -139,6 +148,7 @@ export default function CardsPage() {
       </div>
 
       <AddCardModal isOpen={showAdd} onClose={() => setShowAdd(false)} />
+      <EditCardModal card={editCard} isOpen={!!editCard} onClose={() => setEditCard(null)} />
     </div>
   );
 }

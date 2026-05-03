@@ -54,7 +54,7 @@ export default function CardDetailPage() {
   const totalTx      = transactions.length;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-3xl mx-auto">
       {/* Back */}
       <button
         onClick={() => router.back()}
@@ -73,18 +73,18 @@ export default function CardDetailPage() {
           <CreditCard card={card} />
 
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3 mt-5">
-            <div className="card p-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-5">
+            <div className="card p-3 sm:p-4">
               <p className="text-xs text-[var(--color-text-muted)] mb-1">Transactions</p>
-              <p className="text-xl font-bold text-[var(--color-text-primary)]">{totalTx}</p>
+              <p className="text-lg sm:text-xl font-bold text-[var(--color-text-primary)]">{totalTx}</p>
             </div>
-            <div className="card p-4">
-              <p className="text-xs text-[var(--color-text-muted)] mb-1">Total spent</p>
-              <p className="text-xl font-bold text-[var(--color-danger)]">{formatCurrency(totalSpent)}</p>
+            <div className="card p-3 sm:p-4">
+              <p className="text-xs text-[var(--color-text-muted)] mb-1">Spent</p>
+              <p className="text-lg sm:text-xl font-bold text-[var(--color-danger)]">{formatCurrency(totalSpent)}</p>
             </div>
-            <div className="card p-4">
-              <p className="text-xs text-[var(--color-text-muted)] mb-1">Total income</p>
-              <p className="text-xl font-bold text-[var(--color-income,#57c93c)]">{formatCurrency(totalIncome)}</p>
+            <div className="card p-3 sm:p-4">
+              <p className="text-xs text-[var(--color-text-muted)] mb-1">Income</p>
+              <p className="text-lg sm:text-xl font-bold text-[var(--color-income,#57c93c)]">{formatCurrency(totalIncome)}</p>
             </div>
           </div>
         </motion.div>

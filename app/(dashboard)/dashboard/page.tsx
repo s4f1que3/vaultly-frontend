@@ -85,7 +85,7 @@ export default function DashboardPage() {
   const unread = notifications.filter((n) => !n.is_read).slice(0, 3);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
+    <div className="px-4 py-6 sm:px-6 max-w-6xl mx-auto space-y-8">
       {/* ── Section 1: Header / Greeting ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

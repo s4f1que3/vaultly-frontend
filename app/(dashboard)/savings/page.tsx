@@ -178,7 +178,7 @@ export default function SavingsPage() {
   const totalSaved = pots.reduce((s, p) => s + p.amount, 0);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-4xl mx-auto">
       <PageHeader
         title="Savings"
         subtitle={`${pots.length} pot${pots.length !== 1 ? 's' : ''} · Total saved ${formatCurrency(totalSaved)}`}

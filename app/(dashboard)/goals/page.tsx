@@ -201,7 +201,7 @@ export default function GoalsPage() {
   const completed = goals.filter((g) => g.status === 'completed');
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-4xl mx-auto">
       <PageHeader
         title="Savings Goals"
         subtitle={`${active.length} active · ${completed.length} completed`}

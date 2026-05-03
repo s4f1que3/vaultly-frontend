@@ -28,7 +28,7 @@ export default function NotificationsPage() {
   useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-3xl mx-auto">
       <PageHeader
         title="Notifications"
         subtitle={`${unreadCount} unread`}

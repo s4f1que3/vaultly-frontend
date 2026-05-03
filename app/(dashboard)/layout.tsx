@@ -172,9 +172,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)]">
+    <div className="flex min-h-screen bg-[var(--color-bg)] overflow-x-hidden">
       <Sidebar />
-      <main className="flex-1 lg:ml-[220px] pb-20 lg:pb-0 flex flex-col">
+      <main className="flex-1 lg:ml-[220px] pb-20 lg:pb-0 flex flex-col min-w-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}

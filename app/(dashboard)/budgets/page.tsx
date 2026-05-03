@@ -203,7 +203,7 @@ export default function BudgetsPage() {
   }).length;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-4xl mx-auto">
       <PageHeader
         title="Budgets"
         subtitle="Set spending limits and track your categories"

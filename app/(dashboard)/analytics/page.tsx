@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
   const weeklyPattern = Object.entries(dayOfWeekMap).map(([day, amount]) => ({ day, amount }));
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="px-4 py-6 sm:px-6 max-w-6xl mx-auto space-y-6">
       <PageHeader title="Analytics" subtitle="Detailed insights into your spending patterns" />
 
       {/* KPI row */}

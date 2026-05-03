@@ -60,7 +60,7 @@ export default function SubscriptionsPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="px-4 py-6 sm:px-6 max-w-4xl mx-auto">
       <PageHeader
         title="Subscriptions"
         subtitle={`${active.length} active subscription${active.length !== 1 ? 's' : ''}`}

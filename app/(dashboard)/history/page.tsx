@@ -643,7 +643,7 @@ export default function HistoryPage() {
   const hasPeriods = periods && (periods.months.length > 0 || periods.years.length > 0);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="px-4 py-6 sm:px-6 max-w-5xl mx-auto space-y-6">
       <PageHeader
         title="History"
         subtitle="Monthly and yearly financial summaries"
