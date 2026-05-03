@@ -28,6 +28,7 @@ async function request<T>(
         'Content-Type': 'application/json',
         ...auth,
       },
+      cache: 'no-store',
       signal: controller.signal,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
