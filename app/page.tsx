@@ -536,7 +536,7 @@ export default function HomePage() {
                   <div>
                     <h3 className="font-semibold text-[var(--color-text-primary)]">Lifetime License Option</h3>
                     <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                      Prefer one-time payment? Buy a lifetime license for $400 and own your access forever.
+                      Prefer one-time payment? Buy a lifetime license for $2000 and own your access forever.
                     </p>
                   </div>
                 </div>

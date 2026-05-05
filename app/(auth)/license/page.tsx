@@ -49,7 +49,7 @@ export default function LicensePage() {
             <div>
               <p className="text-sm text-[var(--color-text-muted)]">One-time payment</p>
               <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-4xl font-bold text-[var(--color-text-primary)]">$400</span>
+                <span className="text-4xl font-bold text-[var(--color-text-primary)]">$2000</span>
                 <span className="text-sm text-[var(--color-text-muted)]">USD</span>
               </div>
             </div>

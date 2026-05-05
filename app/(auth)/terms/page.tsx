@@ -116,7 +116,7 @@ export default function TermsPage() {
               </li>
               <li>
                 <span className="text-[var(--color-text-primary)] font-medium">Lifetime License</span>
-                {' '}— $400.00 USD one-time payment granting permanent access to the Service.
+                {' '}— $2000.00 USD one-time payment granting permanent access to the Service.
               </li>
             </ul>
             <p>

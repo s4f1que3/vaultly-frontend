@@ -491,7 +491,7 @@ export default function SubscribePage() {
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[var(--color-border)] text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-text-primary)] transition-all"
                   >
                     <Infinity size={15} className="text-[var(--color-accent)]" />
-                    Buy a lifetime license — $400 one-time
+                    Buy a lifetime license — $2000 one-time
                   </Link>
                 </motion.div>
               )}
@@ -640,7 +640,7 @@ export default function SubscribePage() {
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[var(--color-border)] text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-text-primary)] transition-all"
                   >
                     <Infinity size={15} className="text-[var(--color-accent)]" />
-                    Buy a lifetime license — $400 one-time
+                    Buy a lifetime license — $2000 one-time
                   </Link>
                 </>
               )}

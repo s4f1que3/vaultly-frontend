@@ -113,7 +113,7 @@ const jsonLd = {
         {
           '@type': 'Offer',
           name: 'Lifetime License',
-          price: '400.00',
+          price: '2000.00',
           priceCurrency: 'USD',
           description: 'One-time payment, unlimited access forever',
         },
