@@ -9,18 +9,24 @@ import CreditCard from '@/components/cards/CreditCard';
 import AddCardModal from '@/components/cards/AddCardModal';
 import EditCardModal from '@/components/cards/EditCardModal';
 import { useCardStore } from '@/stores/useCardStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { Card } from '@/types';
 
 export default function CardsPage() {
   const { cards, isLoading, fetchCards, deleteCard, setDefault } = useCardStore();
+  const { isChecking, access } = useBillingStore();
   const [showAdd, setShowAdd] = useState(false);
   const [editCard, setEditCard] = useState<Card | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => { fetchCards(); }, [fetchCards]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchCards();
+    }
+  }, [fetchCards, isChecking, access]);
 
   const totalBalance = cards.reduce((s, c) => s + c.balance, 0);
   const defaultCard = cards.find((c) => c.is_default);

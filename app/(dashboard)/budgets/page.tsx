@@ -11,6 +11,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import Modal from '@/components/ui/Modal';
 import { useBudgetStore } from '@/stores/useBudgetStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { Budget, TransactionCategory } from '@/types';
 import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS, formatCurrency, formatPercentage } from '@/lib/utils/formatters';
 
@@ -190,10 +191,15 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
 
 export default function BudgetsPage() {
   const { budgets, isLoading, fetchBudgets, deleteBudget } = useBudgetStore();
+  const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editBudget, setEditBudget] = useState<Budget | null>(null);
 
-  useEffect(() => { fetchBudgets(); }, [fetchBudgets]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchBudgets();
+    }
+  }, [fetchBudgets, isChecking, access]);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.limit_amount + (b.income_amount ?? 0), 0);
   const totalSpent = budgets.reduce((s, b) => s + b.spent_amount, 0);

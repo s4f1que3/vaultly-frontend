@@ -6,6 +6,7 @@ import { Plus, Search, Filter, Pencil, Trash2, TrendingUp, TrendingDown, ArrowLe
 import PageHeader from '@/components/ui/PageHeader';
 import TransactionModal from '@/components/transactions/TransactionModal';
 import { useTransactionStore } from '@/stores/useTransactionStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { Transaction, TransactionCategory, TransactionType } from '@/types';
 import {
   formatCurrency, formatDate, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS,
@@ -25,13 +26,18 @@ const TYPE_COLORS = {
 
 export default function TransactionsPage() {
   const { transactions, isLoading, fetchTransactions, setFilters, filters, deleteTransaction, total } = useTransactionStore();
+  const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editTx, setEditTx] = useState<Transaction | null>(null);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TransactionType | ''>('');
   const [categoryFilter, setCategoryFilter] = useState<TransactionCategory | ''>('');
 
-  useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchTransactions();
+    }
+  }, [fetchTransactions, isChecking, access]);
 
   const applyFilters = () => {
     setFilters({

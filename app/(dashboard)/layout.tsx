@@ -34,10 +34,13 @@ function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { unreadCount, fetchNotifications } = useNotificationStore();
+  const { isChecking } = useBillingStore();
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (!isChecking) {
+      fetchNotifications();
+    }
+  }, [fetchNotifications, isChecking]);
 
   const handleSignOut = async () => {
     const supabase = createClient();

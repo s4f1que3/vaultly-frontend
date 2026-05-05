@@ -17,6 +17,7 @@ import { useBudgetStore } from '@/stores/useBudgetStore';
 import { useGoalStore } from '@/stores/useGoalStore';
 import { useNotificationStore } from '@/stores/useNotificationStore';
 import { useTransactionStore } from '@/stores/useTransactionStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import {
   formatCurrency, formatCompact, formatDate, formatPercentage,
   CATEGORY_ICONS, CATEGORY_LABELS, CATEGORY_COLORS,
@@ -38,9 +39,12 @@ export default function DashboardPage() {
   const { goals, fetchGoals } = useGoalStore();
   const { notifications, fetchNotifications } = useNotificationStore();
   const { transactions, fetchTransactions, isLoading: txLoading } = useTransactionStore();
+  const { isChecking, access } = useBillingStore();
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
+    if (isChecking || !access?.hasAccess) return;
+
     fetchCards();
     fetchBudgets();
     fetchGoals();
@@ -52,7 +56,7 @@ export default function DashboardPage() {
       const name = data.user?.user_metadata?.full_name || data.user?.email?.split('@')[0] || '';
       setUserName(name);
     });
-  }, [fetchCards, fetchBudgets, fetchGoals, fetchNotifications, fetchTransactions]);
+  }, [fetchCards, fetchBudgets, fetchGoals, fetchNotifications, fetchTransactions, isChecking, access]);
 
   // Computed stats
   const totalBalance = cards.reduce((s, c) => s + c.balance, 0);

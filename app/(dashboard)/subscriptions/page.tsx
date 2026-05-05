@@ -7,6 +7,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import SubscriptionModal from '@/components/subscriptions/SubscriptionModal';
 import { useSubscriptionStore } from '@/stores/useSubscriptionStore';
 import { useCardStore } from '@/stores/useCardStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { Subscription } from '@/types';
 import { formatCurrency } from '@/lib/utils/formatters';
 
@@ -37,10 +38,15 @@ function daysUntil(dateStr: string) {
 export default function SubscriptionsPage() {
   const { subscriptions, isLoading, error, fetchSubscriptions, deleteSubscription } = useSubscriptionStore();
   const { cards } = useCardStore();
+  const { isChecking, access } = useBillingStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Subscription | undefined>();
 
-  useEffect(() => { fetchSubscriptions(); }, [fetchSubscriptions]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchSubscriptions();
+    }
+  }, [fetchSubscriptions, isChecking, access]);
 
   const active = subscriptions.filter(s => s.is_active);
   const monthlyTotal = active.reduce((sum, s) => {

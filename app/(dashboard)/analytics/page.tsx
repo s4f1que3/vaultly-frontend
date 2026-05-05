@@ -10,6 +10,7 @@ import {
 import PageHeader from '@/components/ui/PageHeader';
 import { useTransactionStore } from '@/stores/useTransactionStore';
 import { useBudgetStore } from '@/stores/useBudgetStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import {
   formatCurrency, formatCompact, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS,
 } from '@/lib/utils/formatters';
@@ -30,12 +31,15 @@ const TICK_PROPS = { fill: 'var(--color-text-muted)', fontSize: 11 };
 export default function AnalyticsPage() {
   const { transactions, fetchTransactions } = useTransactionStore();
   const { budgets, fetchBudgets } = useBudgetStore();
+  const { isChecking, access } = useBillingStore();
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
 
   useEffect(() => {
-    fetchTransactions();
-    fetchBudgets();
-  }, [fetchTransactions, fetchBudgets]);
+    if (!isChecking && access?.hasAccess) {
+      fetchTransactions();
+      fetchBudgets();
+    }
+  }, [fetchTransactions, fetchBudgets, isChecking, access]);
 
   // ── Data derivation ──────────────────────────────────────────────────────────
   const income = transactions.filter((t) => t.type === 'income');

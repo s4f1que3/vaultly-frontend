@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import Modal from '@/components/ui/Modal';
 import { useGoalStore } from '@/stores/useGoalStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { Goal } from '@/types';
 import { formatCurrency, formatPercentage, formatDate } from '@/lib/utils/formatters';
 
@@ -191,11 +192,16 @@ function ContributeModal({ isOpen, onClose, goal }: { isOpen: boolean; onClose: 
 
 export default function GoalsPage() {
   const { goals, isLoading, fetchGoals, deleteGoal } = useGoalStore();
+  const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
   const [contributeGoal, setContributeGoal] = useState<Goal | null>(null);
 
-  useEffect(() => { fetchGoals(); }, [fetchGoals]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchGoals();
+    }
+  }, [fetchGoals, isChecking, access]);
 
   const active = goals.filter((g) => g.status === 'active');
   const completed = goals.filter((g) => g.status === 'completed');

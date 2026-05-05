@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
 import CreditCard from '@/components/cards/CreditCard';
 import { useCardStore } from '@/stores/useCardStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { Transaction } from '@/types';
 import api from '@/lib/api';
 import {
@@ -27,16 +28,21 @@ export default function CardDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { cards, fetchCards } = useCardStore();
+  const { isChecking, access } = useBillingStore();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => { fetchCards(); }, [fetchCards]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchCards();
+    }
+  }, [fetchCards, isChecking, access]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || isChecking || !access?.hasAccess) return;
     setIsLoading(true);
     const params = new URLSearchParams({ cardId: id, page: String(page), limit: '20' });
     api.get<PaginatedResponse<Transaction>>(`/transactions?${params}`)
@@ -45,7 +51,7 @@ export default function CardDetailPage() {
         setTotalPages(res.meta.totalPages);
       })
       .finally(() => setIsLoading(false));
-  }, [id, page]);
+  }, [id, page, isChecking, access]);
 
   const card = cards.find((c) => c.id === id);
 

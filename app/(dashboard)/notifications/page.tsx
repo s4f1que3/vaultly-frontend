@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, BellOff, Trash2, CheckCheck } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import { useNotificationStore } from '@/stores/useNotificationStore';
+import { useBillingStore } from '@/stores/useBillingStore';
 import { formatRelativeTime } from '@/lib/utils/formatters';
 import { NotificationType } from '@/types';
 
@@ -24,8 +25,13 @@ const TYPE_COLORS: Record<NotificationType, string> = {
 
 export default function NotificationsPage() {
   const { notifications, isLoading, fetchNotifications, markAsRead, markAllAsRead, deleteNotification, unreadCount } = useNotificationStore();
+  const { isChecking, access } = useBillingStore();
 
-  useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
+  useEffect(() => {
+    if (!isChecking && access?.hasAccess) {
+      fetchNotifications();
+    }
+  }, [fetchNotifications, isChecking, access]);
 
   return (
     <div className="px-4 py-6 sm:px-6 max-w-3xl mx-auto">
