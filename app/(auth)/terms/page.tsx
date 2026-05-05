@@ -140,8 +140,8 @@ export default function TermsPage() {
             <p>
               You may cancel your subscription at any time through your account settings or by
               contacting us. Upon cancellation, your access to the Service will continue until the
-              end of the current paid billing period. No partial refunds are issued for unused time
-              within a billing period.
+              end of the current paid billing period. No refunds are issued are issued at any point in time for any reason.
+              For issues with purchases, our payments are handled via paypal. This means that any issues should be forwarded to them.
             </p>
             <p>
               Lifetime licenses are non-refundable once issued, as the license key is immediately
