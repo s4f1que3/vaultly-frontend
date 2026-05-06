@@ -102,6 +102,9 @@ export default function HomePage() {
             <a href="/terms" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
               Terms
             </a>
+            <a href="/privacy" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+              Privacy
+            </a>
           </div>
 
           {/* Desktop buttons */}
@@ -156,6 +159,12 @@ export default function HomePage() {
                 className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors py-2"
               >
                 Terms
+              </a>
+              <a
+                href="/privacy"
+                className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors py-2"
+              >
+                Privacy
               </a>
               <div className="border-t border-[var(--color-border)] pt-3 mt-3 space-y-2">
                 <Link
