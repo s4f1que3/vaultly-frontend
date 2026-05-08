@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Footer from '@/components/ui/Footer';
@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, CreditCard, ArrowLeftRight, Target,
-  PiggyBank, BarChart3, Bell, Settings, LogOut, RefreshCw, History, Wallet
+  PiggyBank, BarChart3, Bell, Settings, LogOut, RefreshCw, History, Wallet, MoreHorizontal, X
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/stores/useNotificationStore';
@@ -85,34 +85,128 @@ function Sidebar() {
 
 function MobileNav() {
   const pathname = usePathname();
-  const MOBILE_ITEMS = NAV_ITEMS.slice(0, 5);
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const MOBILE_ITEMS = NAV_ITEMS.slice(0, 4);
+  const MORE_ITEMS = NAV_ITEMS.slice(4);
   const { unreadCount } = useNotificationStore();
 
+  const isMoreActive = MORE_ITEMS.some(
+    ({ href }) => pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+  );
+
+  const handleSignOut = async () => {
+    setMenuOpen(false);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      <div className="flex items-center justify-around py-2">
-        {MOBILE_ITEMS.map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all relative ${
-                isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
-              }`}
-            >
-              <Icon size={20} />
-              <span className="text-[10px] font-medium">{label}</span>
-              {label === 'Notifications' && unreadCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[var(--color-accent)] text-[#0d0a06] text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+    <>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="lg:hidden fixed inset-0 z-30 bg-black/50"
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="menu"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border)] rounded-t-2xl"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          >
+            <div className="flex items-center justify-between px-5 pt-4 pb-3">
+              <span className="text-sm font-semibold text-[var(--color-text-primary)]">Menu</span>
+              <button onClick={() => setMenuOpen(false)} className="text-[var(--color-text-muted)]">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 px-4 pb-4">
+              {MORE_ITEMS.map(({ href, icon: Icon, label }) => {
+                const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className={`flex flex-col items-center gap-2 px-3 py-4 rounded-xl transition-all relative border ${
+                      isActive
+                        ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/10 border-[var(--color-accent)]/30'
+                        : 'text-[var(--color-text-muted)] border-[var(--color-border)] bg-[var(--color-bg)]'
+                    }`}
+                  >
+                    <Icon size={22} />
+                    <span className="text-[11px] font-medium">{label}</span>
+                    {label === 'Notifications' && unreadCount > 0 && (
+                      <span className="absolute top-2 right-2 bg-[var(--color-accent)] text-[#0d0a06] text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="px-4 pb-4">
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[var(--color-danger)] border border-[var(--color-border)] bg-[var(--color-bg)] transition-all"
+              >
+                <LogOut size={18} />
+                <span className="text-sm font-medium">Sign out</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-center justify-around py-2">
+          {MOBILE_ITEMS.map(({ href, icon: Icon, label }) => {
+            const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all relative ${
+                  isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
+                }`}
+              >
+                <Icon size={20} />
+                <span className="text-[10px] font-medium">{label}</span>
+              </Link>
+            );
+          })}
+          <button
+            onClick={() => setMenuOpen(true)}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all relative ${
+              isMoreActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
+            }`}
+          >
+            <MoreHorizontal size={20} />
+            <span className="text-[10px] font-medium">More</span>
+            {unreadCount > 0 && !MOBILE_ITEMS.some(i => i.label === 'Notifications') && (
+              <span className="absolute top-1 right-1 bg-[var(--color-accent)] text-[#0d0a06] text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
+      </nav>
+    </>
   );
 }
 
