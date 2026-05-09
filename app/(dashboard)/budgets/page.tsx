@@ -110,7 +110,7 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
             ))}
           </select>
 
-          {/* Create custom category */}
+          {/* Create custom cat */}
           {!isEdit && (
             <div className="mt-2">
               {!showNewCategory ? (

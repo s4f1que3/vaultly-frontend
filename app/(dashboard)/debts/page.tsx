@@ -354,7 +354,7 @@ function LoanCalculator() {
             />
             <Tooltip
               contentStyle={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: 11 }}
-              formatter={(v: unknown, name: string) => [
+              formatter={(v: unknown, name: unknown) => [
                 formatCurrency(Number(v ?? 0)),
                 name === 'balance' ? 'Remaining Balance' : 'Cumulative Interest',
               ]}
