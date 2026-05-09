@@ -111,7 +111,7 @@ export default function CashFlowPage() {
                 <YAxis tick={{ fontSize: 11, fill: 'var(--color-text-secondary)' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   contentStyle={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: 12 }}
-                  formatter={(value: number) => [formatCurrency(value), 'Balance']}
+                  formatter={(value: unknown) => [formatCurrency(Number(value ?? 0)), 'Balance']}
                 />
                 <ReferenceLine y={LOW_THRESHOLD} stroke="#ef4444" strokeDasharray="4 4" opacity={0.6} label={{ value: 'Low', fill: '#ef4444', fontSize: 10 }} />
                 <Area type="monotone" dataKey="balance" stroke="var(--color-accent)" strokeWidth={2} fill="url(#balanceGrad)" dot={false} activeDot={{ r: 4 }} />

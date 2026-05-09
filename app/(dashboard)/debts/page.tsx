@@ -157,7 +157,7 @@ export default function DebtsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" opacity={0.4} />
                     <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--color-text-secondary)' }} tickLine={false} axisLine={false} interval={Math.floor(chartData.length / 5)} />
                     <YAxis tick={{ fontSize: 10, fill: 'var(--color-text-secondary)' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                    <Tooltip contentStyle={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [formatCurrency(v), 'Remaining Balance']} />
+                    <Tooltip contentStyle={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: 11 }} formatter={(v: unknown) => [formatCurrency(Number(v ?? 0)), 'Remaining Balance']} />
                     <Area type="monotone" dataKey="balance" stroke="#ef4444" strokeWidth={2} fill="url(#debtGrad)" dot={false} />
                   </AreaChart>
                 </ResponsiveContainer>
