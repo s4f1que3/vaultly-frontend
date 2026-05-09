@@ -324,8 +324,8 @@ function LoanCalculator() {
       <div className="card p-5">
         <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">Balance Over Time</h3>
         <p className="text-xs text-[var(--color-text-muted)] mb-4">
-          {extraPayment > 0
-            ? `With $${extraPayment}/mo extra — paid off ${Math.floor((extra?.monthsSaved ?? 0) / 12)}yr ${(extra?.monthsSaved ?? 0) % 12}mo early`
+          {extraNum > 0
+            ? `With $${extraNum}/mo extra — paid off ${Math.floor((extra?.monthsSaved ?? 0) / 12)}yr ${(extra?.monthsSaved ?? 0) % 12}mo early`
             : `Remaining balance each year over ${term} years`}
         </p>
         <ResponsiveContainer width="100%" height={220}>
