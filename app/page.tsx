@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
-  TrendingUp, Shield, Zap, PieChart, Target, Bell, BarChart3, Lock, Eye, CheckCircle, ArrowRight, Menu, X,
+  TrendingUp, Shield, Zap, PieChart, Target, Lock, Eye, CheckCircle, ArrowRight, Menu, X,
+  Landmark, Calculator, Users, RefreshCw,
 } from 'lucide-react';
 import { useState } from 'react';
 import Footer from '@/components/ui/Footer';
@@ -12,32 +13,32 @@ const FEATURES = [
   {
     icon: TrendingUp,
     title: 'Smart Expense Tracking',
-    description: 'Track every transaction in real-time. Automatic categorization and smart insights into your spending patterns.',
+    description: 'Track every transaction in real-time with automatic categorization and spending insights. Import directly from your bank via CSV.',
   },
   {
     icon: Target,
     title: 'Budget Management',
-    description: 'Set budgets for each category and get instant alerts when you\'re approaching your limits.',
+    description: 'Set budgets for each category and get predictive alerts before you overspend — not just after.',
   },
   {
-    icon: BarChart3,
-    title: 'Advanced Analytics',
-    description: 'Beautiful, interactive charts showing your spending trends, monthly patterns, and financial progress.',
+    icon: Landmark,
+    title: 'Net Worth Tracking',
+    description: 'See your complete financial picture. Track assets (cards, savings pots, goals) alongside liabilities with payoff progress.',
   },
   {
-    icon: PieChart,
-    title: 'Savings Goals',
-    description: 'Create financial goals and track your progress toward them with visual milestones.',
+    icon: Calculator,
+    title: 'Debt Planner',
+    description: 'Calculate loan payments, compare terms, estimate purchasing power, and model extra payment strategies with an amortization chart.',
   },
   {
-    icon: Bell,
-    title: 'Smart Notifications',
-    description: 'Stay on top of your finances with timely push notifications about your spending and budgets.',
+    icon: RefreshCw,
+    title: 'Recurring & Subscriptions',
+    description: 'Manage all recurring payments and subscriptions in one place. See monthly totals across all billing cycles automatically.',
   },
   {
-    icon: Zap,
-    title: 'Instant Summaries',
-    description: 'Get monthly and yearly spending summaries with insights into your financial behavior.',
+    icon: Users,
+    title: 'Household Sharing',
+    description: 'Share transactions and budgets with household members. See combined spending across your entire household in real-time.',
   },
 ];
 
@@ -297,7 +298,7 @@ export default function HomePage() {
                       Track Every Transaction
                     </h3>
                     <p className="text-[var(--color-text-secondary)] text-sm">
-                      See exactly where your money goes. Automatically categorized transactions with detailed insights.
+                      See exactly where your money goes. Auto-categorized transactions, CSV bank import, and detailed spending insights.
                     </p>
                   </div>
                 </div>
@@ -311,7 +312,51 @@ export default function HomePage() {
                       Build Smart Budgets
                     </h3>
                     <p className="text-[var(--color-text-secondary)] text-sm">
-                      Set budgets for each category and receive smart alerts before you overspend.
+                      Set budgets per category with predictive alerts. Household members can see combined spending in real-time.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--color-accent-dim)] flex items-center justify-center">
+                    <Landmark className="text-[var(--color-accent)]" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                      Net Worth Dashboard
+                    </h3>
+                    <p className="text-[var(--color-text-secondary)] text-sm">
+                      Track assets and liabilities in one view. Add loans with auto-calculated payments and payoff progress bars.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--color-accent-dim)] flex items-center justify-center">
+                    <Calculator className="text-[var(--color-accent)]" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                      Debt Planner
+                    </h3>
+                    <p className="text-[var(--color-text-secondary)] text-sm">
+                      Calculate loan payments, compare terms side-by-side, model extra payments, and visualize amortization over time.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--color-accent-dim)] flex items-center justify-center">
+                    <RefreshCw className="text-[var(--color-accent)]" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                      Recurring & Subscriptions
+                    </h3>
+                    <p className="text-[var(--color-text-secondary)] text-sm">
+                      Manage all recurring bills and subscriptions. Monthly totals calculated automatically across weekly, bi-weekly, and monthly cycles.
                     </p>
                   </div>
                 </div>
@@ -322,54 +367,10 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                      Achieve Financial Goals
+                      Savings Goals & Pots
                     </h3>
                     <p className="text-[var(--color-text-secondary)] text-sm">
-                      Create savings goals and watch your progress with visual milestones.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--color-accent-dim)] flex items-center justify-center">
-                    <BarChart3 className="text-[var(--color-accent)]" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                      Powerful Analytics
-                    </h3>
-                    <p className="text-[var(--color-text-secondary)] text-sm">
-                      Beautiful charts and graphs reveal spending patterns and trends at a glance.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--color-accent-dim)] flex items-center justify-center">
-                    <Bell className="text-[var(--color-accent)]" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                      Smart Notifications
-                    </h3>
-                    <p className="text-[var(--color-text-secondary)] text-sm">
-                      Get timely alerts about budget limits, unusual spending, and financial milestones.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--color-accent-dim)] flex items-center justify-center">
-                    <Zap className="text-[var(--color-accent)]" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                      Financial Summaries
-                    </h3>
-                    <p className="text-[var(--color-text-secondary)] text-sm">
-                      Comprehensive monthly and yearly reports with actionable insights.
+                      Create savings goals with visual milestones. Use savings pots linked to your cards for organized, earmarked funds.
                     </p>
                   </div>
                 </div>
