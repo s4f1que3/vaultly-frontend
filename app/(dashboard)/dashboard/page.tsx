@@ -24,6 +24,8 @@ import {
 } from '@/lib/utils/formatters';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { createClient } from '@/lib/supabase/client';
+import api from '@/lib/api';
+import { FinancialHealthScore, PredictiveAlert } from '@/types';
 
 // Greeting based on time
 function getGreeting() {
@@ -41,6 +43,8 @@ export default function DashboardPage() {
   const { transactions, fetchTransactions, isLoading: txLoading } = useTransactionStore();
   const { isChecking, access } = useBillingStore();
   const [userName, setUserName] = useState('');
+  const [healthScore, setHealthScore] = useState<FinancialHealthScore | null>(null);
+  const [predictiveAlerts, setPredictiveAlerts] = useState<PredictiveAlert[]>([]);
 
   useEffect(() => {
     if (isChecking || !access?.hasAccess) return;
@@ -50,6 +54,11 @@ export default function DashboardPage() {
     fetchGoals();
     fetchNotifications();
     fetchTransactions();
+
+    api.get<FinancialHealthScore>('/intelligence/health-score')
+      .then(setHealthScore).catch(() => {});
+    api.get<{ alerts: PredictiveAlert[] }>('/intelligence/predictive-alerts')
+      .then((r) => setPredictiveAlerts(r.alerts ?? [])).catch(() => {});
 
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
@@ -116,6 +125,84 @@ export default function DashboardPage() {
         <StatCard label="Monthly Expenses" value={formatCompact(monthlyExpenses)} icon={TrendingDown} iconColor="var(--color-danger)" subValue="this month" index={2} />
         <StatCard label="Savings Rate" value={formatPercentage(savingsRate)} icon={PiggyBank} iconColor="var(--color-info)" subValue={`${formatCompact(savings)} saved`} index={3} />
       </div>
+
+      {/* ── Health Score + Predictive Alerts ── */}
+      {(healthScore || predictiveAlerts.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Financial health score */}
+          {healthScore && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Financial Health</h2>
+                <span className={`text-2xl font-bold px-2 py-0.5 rounded-lg ${
+                  healthScore.grade === 'A' ? 'text-green-400 bg-green-400/10' :
+                  healthScore.grade === 'B' ? 'text-blue-400 bg-blue-400/10' :
+                  healthScore.grade === 'C' ? 'text-yellow-400 bg-yellow-400/10' :
+                  'text-red-400 bg-red-400/10'
+                }`}>{healthScore.grade}</span>
+              </div>
+              {/* Score bar */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-3 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${healthScore.score}%` }}
+                    transition={{ duration: 0.8 }}
+                    className={`h-full rounded-full ${
+                      healthScore.score >= 75 ? 'bg-green-400' :
+                      healthScore.score >= 55 ? 'bg-yellow-400' : 'bg-red-400'
+                    }`}
+                  />
+                </div>
+                <span className="text-lg font-bold text-[var(--color-text-primary)] w-12 text-right">
+                  {healthScore.score}<span className="text-xs text-[var(--color-text-secondary)]">/100</span>
+                </span>
+              </div>
+              <p className="text-xs text-[var(--color-text-secondary)] mb-3">{healthScore.trend}</p>
+              <div className="space-y-2">
+                {healthScore.components.map((c) => (
+                  <div key={c.name} className="flex items-center gap-2">
+                    <div className="w-24 shrink-0">
+                      <div className="h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[var(--color-accent)] rounded-full"
+                          style={{ width: `${(c.score / c.maxScore) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-xs text-[var(--color-text-secondary)] truncate flex-1">{c.name}</span>
+                    <span className="text-xs font-medium text-[var(--color-text-primary)] shrink-0">{c.score}/{c.maxScore}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Predictive budget alerts */}
+          {predictiveAlerts.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Predictive Alerts</h2>
+                <span className="text-xs text-[var(--color-text-secondary)]">{predictiveAlerts.length} budget{predictiveAlerts.length > 1 ? 's' : ''} at risk</span>
+              </div>
+              <div className="space-y-3">
+                {predictiveAlerts.slice(0, 4).map((a, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
+                      a.severity === 'critical' ? 'bg-red-500' :
+                      a.severity === 'danger' ? 'bg-orange-400' : 'bg-yellow-400'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-[var(--color-text-primary)] capitalize">{a.category}</p>
+                      <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 leading-relaxed">{a.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* ── Section 3: Spending Chart + Default Card ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

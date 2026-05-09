@@ -8,7 +8,8 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, CreditCard, ArrowLeftRight, Target,
-  PiggyBank, BarChart3, Bell, Settings, LogOut, RefreshCw, History, Wallet, MoreHorizontal, X
+  PiggyBank, BarChart3, Bell, Settings, LogOut, RefreshCw, History, Wallet, MoreHorizontal, X,
+  TrendingUp, TrendingDown, Activity, Users, LineChart,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/stores/useNotificationStore';
@@ -26,6 +27,11 @@ const NAV_ITEMS = [
   { href: '/savings', icon: Wallet, label: 'Savings' },
   { href: '/goals', icon: Target, label: 'Goals' },
   { href: '/subscriptions', icon: RefreshCw, label: 'Subscriptions' },
+  { href: '/recurring', icon: Activity, label: 'Recurring' },
+  { href: '/cashflow', icon: LineChart, label: 'Cash Flow' },
+  { href: '/net-worth', icon: TrendingUp, label: 'Net Worth' },
+  { href: '/debts', icon: TrendingDown, label: 'Debt Planner' },
+  { href: '/household', icon: Users, label: 'Household' },
   { href: '/notifications', icon: Bell, label: 'Notifications' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];

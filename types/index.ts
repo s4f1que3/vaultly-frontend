@@ -72,6 +72,8 @@ export interface Budget {
   limit_amount: number;
   spent_amount: number;
   income_amount: number;
+  rollover_amount: number;
+  rollover_enabled: boolean;
   period: 'monthly' | 'weekly' | 'yearly';
   alert_threshold: number; // percentage (e.g. 80)
   created_at: string;
@@ -552,4 +554,267 @@ export interface YearlySummary {
 export interface SummaryPeriods {
   months: { month: number; year: number; label: string }[];
   years: number[];
+}
+
+// ─── Recurring Transactions ────────────────────────────────────────────────────
+export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly';
+
+export interface RecurringTransaction {
+  id: string;
+  user_id: string;
+  name: string;
+  amount: number;
+  type: TransactionType;
+  category: TransactionCategory;
+  card_id?: string;
+  description?: string;
+  merchant?: string;
+  frequency: RecurringFrequency;
+  day_of_month?: number;
+  day_of_week?: number;
+  start_date: string;
+  end_date?: string;
+  next_due_date: string;
+  last_processed_date?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+// ─── Net Worth / Liabilities ───────────────────────────────────────────────────
+export type LiabilityType = 'mortgage' | 'auto_loan' | 'student_loan' | 'credit_card' | 'personal_loan' | 'other';
+
+export interface Liability {
+  id: string;
+  user_id: string;
+  name: string;
+  type: LiabilityType;
+  balance: number;
+  interest_rate: number;
+  minimum_payment: number;
+  created_at: string;
+}
+
+export interface NetWorth {
+  netWorth: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  assets: {
+    cardBalances: number;
+    savingsPots: number;
+    goalSavings: number;
+    breakdown: { label: string; amount: number }[];
+  };
+  liabilities: {
+    total: number;
+    items: Liability[];
+  };
+  history: { label: string; netWorth: number }[];
+}
+
+// ─── Split Transactions ────────────────────────────────────────────────────────
+export interface TransactionSplit {
+  id: string;
+  transaction_id: string;
+  category: TransactionCategory;
+  amount: number;
+  note?: string;
+}
+
+// ─── Spending Anomalies ────────────────────────────────────────────────────────
+export type AnomalySeverity = 'low' | 'medium' | 'high';
+
+export interface SpendingAnomaly {
+  type: 'price_spike' | 'new_recurring' | 'unusual_category' | 'large_transaction';
+  severity: AnomalySeverity;
+  title: string;
+  description: string;
+  amount: number;
+  merchant?: string;
+  date: string;
+  category?: string;
+}
+
+// ─── Category Trends ──────────────────────────────────────────────────────────
+export interface CategoryMonthTrend {
+  category: string;
+  months: { label: string; amount: number }[];
+  average: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  changePercent: number;
+}
+
+// ─── Savings Rules ────────────────────────────────────────────────────────────
+export type SavingsRuleTrigger = 'monthly' | 'on_income' | 'percentage_of_income';
+
+export interface SavingsRule {
+  id: string;
+  user_id: string;
+  pot_id: string;
+  name: string;
+  trigger_type: SavingsRuleTrigger;
+  amount?: number;
+  percentage?: number;
+  day_of_month?: number;
+  is_active: boolean;
+  last_run_date?: string;
+  created_at: string;
+}
+
+// ─── CSV Import ───────────────────────────────────────────────────────────────
+export interface CsvImportRow {
+  date: string;
+  description: string;
+  amount: number;
+  type: TransactionType;
+  category: TransactionCategory;
+  merchant?: string;
+  _rowIndex: number;
+  _valid: boolean;
+  _error?: string;
+}
+
+export interface CsvImportPreview {
+  rows: CsvImportRow[];
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+}
+
+// ─── Debt Payoff Planner ──────────────────────────────────────────────────────
+export type PayoffStrategy = 'avalanche' | 'snowball';
+
+export interface DebtPayoffMonth {
+  month: number;
+  label: string;
+  totalBalance: number;
+  totalPaid: number;
+  debts: { id: string; name: string; balance: number; payment: number; interest: number }[];
+}
+
+export interface DebtPayoffPlan {
+  strategy: PayoffStrategy;
+  monthlyBudget: number;
+  payoffMonths: number;
+  payoffDate: string;
+  totalInterestPaid: number;
+  totalPaid: number;
+  schedule: DebtPayoffMonth[];
+  debtOrder: { id: string; name: string; payoffMonth: number; payoffLabel: string }[];
+}
+
+// ─── Shared Budgets / Household ───────────────────────────────────────────────
+export type HouseholdRole = 'owner' | 'member';
+
+export interface Household {
+  id: string;
+  owner_id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface HouseholdMember {
+  id: string;
+  household_id: string;
+  user_id: string;
+  email: string;
+  full_name?: string;
+  role: HouseholdRole;
+  joined_at: string;
+}
+
+export interface HouseholdInvite {
+  id: string;
+  household_id: string;
+  invited_email: string;
+  invited_by: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: string;
+}
+
+// ─── Spending Forecast ────────────────────────────────────────────────────────
+export interface CategoryForecast {
+  category: string;
+  forecastedAmount: number;
+  currentMonthSpend: number;
+  projectedCurrentMonth: number;
+  pace: 'ahead' | 'behind' | 'on_track';
+  pacePercent: number;
+  monthlyHistory: { month: string; amount: number }[];
+}
+
+export interface SpendingForecast {
+  forecasts: CategoryForecast[];
+  summary: {
+    totalForecastedMonthly: number;
+    totalCurrentProjected: number;
+    overallPacePercent: number;
+    monthElapsedPercent: number;
+  };
+}
+
+// ─── Predictive Budget Alerts ─────────────────────────────────────────────────
+export interface PredictiveAlert {
+  category: string;
+  severity: 'warning' | 'danger' | 'critical';
+  currentSpend: number;
+  limit: number;
+  projectedSpend: number;
+  projectedOverageAmount: number;
+  projectedOveragePercent: number;
+  daysLeft: number;
+  message: string;
+}
+
+// ─── Goal Feasibility ─────────────────────────────────────────────────────────
+export type GoalFeasibility = 'realistic' | 'tight' | 'unreachable' | 'no_deadline';
+
+export interface GoalFeasibilityResult {
+  goalId: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  target: number;
+  current: number;
+  remaining: number;
+  progressPct: number;
+  deadline: string | null;
+  feasibility: GoalFeasibility;
+  monthsNeeded: number | null;
+  monthlySavingsRequired: number | null;
+  shortfallPerMonth: number | null;
+  message: string;
+}
+
+// ─── Financial Health Score ───────────────────────────────────────────────────
+export interface HealthScoreComponent {
+  name: string;
+  score: number;
+  maxScore: number;
+  insight: string;
+}
+
+export interface FinancialHealthScore {
+  score: number;
+  maxScore: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  trend: string;
+  components: HealthScoreComponent[];
+  lastUpdated: string;
+}
+
+// ─── Seasonality ──────────────────────────────────────────────────────────────
+export interface CategorySeasonality {
+  category: string;
+  hasSeasonality: boolean;
+  peakMonth: string | null;
+  troughMonth: string | null;
+  peakMultiplier: number;
+  troughMultiplier: number;
+  monthlyMultipliers: { month: string; multiplier: number }[];
+}
+
+export interface SeasonalityData {
+  categories: CategorySeasonality[];
+  upcomingSpikes: { category: string; month: string; multiplier: number }[] | null[];
+  hasEnoughData: boolean;
 }

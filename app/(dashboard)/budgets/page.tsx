@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, AlertTriangle, Pencil, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Pencil, ChevronDown, TrendingUp, TrendingDown, Minus, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,8 +12,9 @@ import Modal from '@/components/ui/Modal';
 import { useBudgetStore } from '@/stores/useBudgetStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
 import { useBillingStore } from '@/stores/useBillingStore';
-import { Budget, TransactionCategory } from '@/types';
+import { Budget, TransactionCategory, CategoryForecast, SpendingForecast } from '@/types';
 import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS, formatCurrency, formatPercentage } from '@/lib/utils/formatters';
+import api from '@/lib/api';
 
 const schema = z.object({
   category: z.string(),
@@ -190,16 +191,22 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
 }
 
 export default function BudgetsPage() {
-  const { budgets, isLoading, fetchBudgets, deleteBudget } = useBudgetStore();
+  const { budgets, isLoading, fetchBudgets, deleteBudget, toggleRollover } = useBudgetStore();
   const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editBudget, setEditBudget] = useState<Budget | null>(null);
+  const [forecast, setForecast] = useState<SpendingForecast | null>(null);
 
   useEffect(() => {
     if (!isChecking && access?.hasAccess) {
       fetchBudgets();
+      api.get<SpendingForecast>('/intelligence/forecast')
+        .then(setForecast).catch(() => {});
     }
   }, [fetchBudgets, isChecking, access]);
+
+  const getForecast = (category: string): CategoryForecast | undefined =>
+    forecast?.forecasts.find((f) => f.category === category);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.limit_amount + (b.income_amount ?? 0), 0);
   const totalSpent = budgets.reduce((s, b) => s + b.spent_amount, 0);
@@ -324,10 +331,46 @@ export default function BudgetsPage() {
                     </p>
                   </div>
 
-                  <div className="mt-2">
+                  <div className="mt-2 flex items-center gap-2 flex-wrap">
                     <span className={`badge ${isOver ? 'badge-red' : isAlert ? 'badge-yellow' : 'badge-green'}`}>
                       {formatPercentage(pct)} used
                     </span>
+
+                    {/* Forecast pace chip */}
+                    {(() => {
+                      const f = getForecast(b.category);
+                      if (!f) return null;
+                      return (
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${
+                          f.pace === 'ahead'    ? 'bg-red-400/10 text-red-400' :
+                          f.pace === 'behind'   ? 'bg-green-400/10 text-green-400' :
+                                                  'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)]'
+                        }`}>
+                          {f.pace === 'ahead'  ? <TrendingUp size={10} /> :
+                           f.pace === 'behind' ? <TrendingDown size={10} /> :
+                                                 <Minus size={10} />}
+                          {f.pace === 'ahead'  ? `+${f.pacePercent}% pace` :
+                           f.pace === 'behind' ? `${f.pacePercent}% pace` :
+                                                 'On track'}
+                        </span>
+                      );
+                    })()}
+
+                    {/* Rollover toggle */}
+                    <button
+                      onClick={() => toggleRollover(b.id, !b.rollover_enabled)}
+                      className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${
+                        b.rollover_enabled
+                          ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
+                          : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                      }`}
+                    >
+                      {b.rollover_enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                      Rollover {b.rollover_enabled ? 'on' : 'off'}
+                      {b.rollover_enabled && b.rollover_amount > 0 && (
+                        <span className="ml-0.5 text-green-400">+{formatCurrency(b.rollover_amount)}</span>
+                      )}
+                    </button>
                   </div>
                 </motion.div>
               );

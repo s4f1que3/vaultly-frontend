@@ -9,6 +9,7 @@ interface BudgetState {
   addBudget: (data: Partial<Budget>) => Promise<Budget>;
   updateBudget: (id: string, data: Partial<Budget>) => Promise<void>;
   deleteBudget: (id: string) => Promise<void>;
+  toggleRollover: (id: string, enabled: boolean) => Promise<void>;
 }
 
 export const useBudgetStore = create<BudgetState>((set, get) => ({
@@ -53,5 +54,12 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
       set({ budgets: prev });
       throw err;
     }
+  },
+
+  toggleRollover: async (id, enabled) => {
+    set((state) => ({
+      budgets: state.budgets.map((b) => b.id === id ? { ...b, rollover_enabled: enabled } : b),
+    }));
+    await api.patch(`/budgets/${id}/rollover`, { enabled });
   },
 }));

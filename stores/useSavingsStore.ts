@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import { SavingsRule } from '@/types';
 
 export interface SavingsPot {
   id: string;
@@ -13,15 +14,21 @@ export interface SavingsPot {
 
 interface SavingsStore {
   pots: SavingsPot[];
+  rules: SavingsRule[];
   isLoading: boolean;
   fetchPots: () => Promise<void>;
   addPot: (data: Partial<SavingsPot>) => Promise<void>;
   updatePot: (id: string, data: Partial<SavingsPot>) => Promise<void>;
   deletePot: (id: string) => Promise<void>;
+  fetchRules: () => Promise<void>;
+  addRule: (data: Partial<SavingsRule>) => Promise<void>;
+  updateRule: (id: string, data: Partial<SavingsRule>) => Promise<void>;
+  deleteRule: (id: string) => Promise<void>;
 }
 
 export const useSavingsStore = create<SavingsStore>((set, get) => ({
   pots: [],
+  rules: [],
   isLoading: false,
 
   fetchPots: async () => {
@@ -59,5 +66,25 @@ export const useSavingsStore = create<SavingsStore>((set, get) => ({
       set({ pots: prev });
       throw new Error('Failed to delete savings pot');
     }
+  },
+
+  fetchRules: async () => {
+    const res = await api.get<{ data: SavingsRule[] }>('/savings-pots/rules');
+    set({ rules: res.data ?? [] });
+  },
+
+  addRule: async (data) => {
+    const created = await api.post<SavingsRule>('/savings-pots/rules', data);
+    set((s) => ({ rules: [...s.rules, created] }));
+  },
+
+  updateRule: async (id, data) => {
+    set((s) => ({ rules: s.rules.map((r) => r.id === id ? { ...r, ...data } : r) }));
+    await api.patch(`/savings-pots/rules/${id}`, data);
+  },
+
+  deleteRule: async (id) => {
+    set((s) => ({ rules: s.rules.filter((r) => r.id !== id) }));
+    await api.delete(`/savings-pots/rules/${id}`);
   },
 }));

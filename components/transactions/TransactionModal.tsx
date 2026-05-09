@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, Scissors } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { useTransactionStore } from '@/stores/useTransactionStore';
 import { useCardStore } from '@/stores/useCardStore';
 import { Transaction, TransactionCategory, BudgetImpact } from '@/types';
-import { CATEGORY_LABELS, CATEGORY_ICONS } from '@/lib/utils/formatters';
+import { CATEGORY_LABELS, CATEGORY_ICONS, formatCurrency } from '@/lib/utils/formatters';
 import { useCategoryStore } from '@/stores/useCategoryStore';
+import api from '@/lib/api';
 
 const schema = z.object({
   amount: z.coerce.number().positive('Amount must be positive'),
@@ -35,11 +36,22 @@ const DEFAULT_CATEGORIES: TransactionCategory[] = [
   'utilities', 'housing', 'education', 'salary', 'investment', 'transfer', 'other', 'general',
 ];
 
+interface SplitRow {
+  category: TransactionCategory;
+  amount: number;
+  note: string;
+}
+
 export default function TransactionModal({ isOpen, onClose, transaction }: Props) {
   const { addTransaction, updateTransaction } = useTransactionStore();
   const { cards, fetchCards } = useCardStore();
   const { customCategories, fetchCategories } = useCategoryStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [showSplit, setShowSplit] = useState(false);
+  const [splits, setSplits] = useState<SplitRow[]>([
+    { category: 'food', amount: 0, note: '' },
+    { category: 'other', amount: 0, note: '' },
+  ]);
   const isEdit = !!transaction;
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
@@ -78,16 +90,32 @@ export default function TransactionModal({ isOpen, onClose, transaction }: Props
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
+      let savedId: string;
       if (isEdit && transaction) {
         await updateTransaction(transaction.id, data as Partial<Transaction>);
+        savedId = transaction.id;
       } else {
-        await addTransaction(data as Partial<Transaction>);
+        const created = await addTransaction(data as Partial<Transaction>);
+        savedId = created.id;
+      }
+      // If split mode is active, save splits too
+      if (showSplit && splits.length >= 2) {
+        const totalSplit = splits.reduce((s, sp) => s + sp.amount, 0);
+        if (Math.abs(totalSplit - data.amount) < 0.01) {
+          await api.post(`/transactions/${savedId}/splits`, { splits });
+        }
       }
       onClose();
     } finally {
       setIsLoading(false);
     }
   };
+
+  const splitTotal = splits.reduce((s, sp) => s + (sp.amount || 0), 0);
+  const allCategories = [
+    ...DEFAULT_CATEGORIES,
+    ...customCategories.filter((c) => !DEFAULT_CATEGORIES.includes(c.name as TransactionCategory)).map((c) => c.name as TransactionCategory),
+  ];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Transaction' : 'Add Transaction'}>
@@ -208,6 +236,48 @@ export default function TransactionModal({ isOpen, onClose, transaction }: Props
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Split toggle */}
+        <div className="flex items-center gap-3 pt-1">
+          <button type="button" onClick={() => setShowSplit((v) => !v)}
+            className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)]">
+            <Scissors size={13} />
+            {showSplit ? 'Remove split' : 'Split by category'}
+          </button>
+        </div>
+
+        {/* Split rows */}
+        {showSplit && (
+          <div className="border border-[var(--color-border)] rounded-xl p-4 space-y-3">
+            <p className="text-xs font-medium text-[var(--color-text-secondary)]">Split transaction across categories</p>
+            {splits.map((sp, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select value={sp.category} onChange={(e) => setSplits((prev) => prev.map((r, j) => j === i ? { ...r, category: e.target.value as TransactionCategory } : r))}
+                  className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs">
+                  {allCategories.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>)}
+                </select>
+                <input type="number" step="0.01" value={sp.amount || ''} placeholder="0.00" onChange={(e) => setSplits((prev) => prev.map((r, j) => j === i ? { ...r, amount: parseFloat(e.target.value) || 0 } : r))}
+                  className="w-24 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs" />
+                <input value={sp.note} onChange={(e) => setSplits((prev) => prev.map((r, j) => j === i ? { ...r, note: e.target.value } : r))}
+                  placeholder="Note" className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs" />
+                {splits.length > 2 && (
+                  <button type="button" onClick={() => setSplits((prev) => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">
+                    <Trash2 size={13} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <div className="flex items-center justify-between">
+              <button type="button" onClick={() => setSplits((prev) => [...prev, { category: 'other', amount: 0, note: '' }])}
+                className="flex items-center gap-1 text-xs text-[var(--color-accent)] hover:underline">
+                <Plus size={12} /> Add split
+              </button>
+              <span className={`text-xs font-medium ${Math.abs(splitTotal - (watch('amount') || 0)) < 0.01 ? 'text-green-400' : 'text-red-400'}`}>
+                {formatCurrency(splitTotal)} / {formatCurrency(watch('amount') || 0)}
+              </span>
+            </div>
           </div>
         )}
 

@@ -7,6 +7,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
+import { TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import { useTransactionStore } from '@/stores/useTransactionStore';
 import { useBudgetStore } from '@/stores/useBudgetStore';
@@ -14,6 +15,8 @@ import { useBillingStore } from '@/stores/useBillingStore';
 import {
   formatCurrency, formatCompact, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS,
 } from '@/lib/utils/formatters';
+import api from '@/lib/api';
+import { SpendingAnomaly, CategoryMonthTrend, SeasonalityData, SpendingForecast } from '@/types';
 
 const CHART_TOOLTIP_STYLE = {
   contentStyle: {
@@ -33,13 +36,55 @@ export default function AnalyticsPage() {
   const { budgets, fetchBudgets } = useBudgetStore();
   const { isChecking, access } = useBillingStore();
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
+  const [anomalies, setAnomalies] = useState<SpendingAnomaly[]>([]);
+  const [categoryTrends, setCategoryTrends] = useState<CategoryMonthTrend[]>([]);
+  const [seasonality, setSeasonality] = useState<SeasonalityData | null>(null);
+  const [forecast, setForecast] = useState<SpendingForecast | null>(null);
 
   useEffect(() => {
     if (!isChecking && access?.hasAccess) {
       fetchTransactions();
       fetchBudgets();
+      // Load anomalies and build category trends from transactions
+      api.get<{ anomalies: SpendingAnomaly[] }>('/intelligence/anomalies')
+        .then((r) => setAnomalies(r.anomalies ?? []))
+        .catch(() => {});
+      api.get<SeasonalityData>('/intelligence/seasonality')
+        .then(setSeasonality).catch(() => {});
+      api.get<SpendingForecast>('/intelligence/forecast')
+        .then(setForecast).catch(() => {});
     }
   }, [fetchTransactions, fetchBudgets, isChecking, access]);
+
+  // Build month-over-month category trends from loaded transactions
+  useEffect(() => {
+    if (!transactions.length) return;
+    const expenses = transactions.filter((t) => t.type === 'expense');
+    const byCategory = new Map<string, Map<string, number>>();
+    for (const tx of expenses) {
+      const month = tx.date.slice(0, 7);
+      if (!byCategory.has(tx.category)) byCategory.set(tx.category, new Map());
+      const prev = byCategory.get(tx.category)!.get(month) ?? 0;
+      byCategory.get(tx.category)!.set(month, prev + tx.amount);
+    }
+    const trends: CategoryMonthTrend[] = [];
+    for (const [category, monthMap] of byCategory) {
+      const sorted = [...monthMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
+      const amounts = sorted.map(([, v]) => v);
+      const average = amounts.reduce((s, v) => s + v, 0) / (amounts.length || 1);
+      const last = amounts[amounts.length - 1] ?? 0;
+      const prev = amounts[amounts.length - 2] ?? 0;
+      const changePercent = prev > 0 ? Math.round(((last - prev) / prev) * 100) : 0;
+      trends.push({
+        category,
+        months: sorted.map(([label, amount]) => ({ label: label.slice(5), amount })),
+        average,
+        trend: changePercent > 10 ? 'increasing' : changePercent < -10 ? 'decreasing' : 'stable',
+        changePercent,
+      });
+    }
+    setCategoryTrends(trends.sort((a, b) => b.average - a.average).slice(0, 8));
+  }, [transactions]);
 
   // ── Data derivation ──────────────────────────────────────────────────────────
   const income = transactions.filter((t) => t.type === 'income');
@@ -259,6 +304,170 @@ export default function AnalyticsPage() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* Spending Anomalies */}
+      {anomalies.length > 0 && (
+        <div className="bg-[var(--color-surface-2)] rounded-2xl p-5 border border-[var(--color-border)]">
+          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
+            <AlertTriangle size={15} className="text-yellow-400" /> Spending Anomalies
+          </h2>
+          <div className="space-y-3">
+            {anomalies.slice(0, 6).map((a, i) => (
+              <div key={i} className="flex items-start gap-3 py-2 border-b border-[var(--color-border)] last:border-0">
+                <span className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${a.severity === 'high' ? 'bg-red-400' : a.severity === 'medium' ? 'bg-yellow-400' : 'bg-blue-400'}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[var(--color-text-primary)]">{a.title}</p>
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{a.description}</p>
+                </div>
+                <span className="text-sm font-medium text-red-400 shrink-0">{formatCurrency(a.amount)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Category Trend Sparklines */}
+      {categoryTrends.length > 0 && (
+        <div className="bg-[var(--color-surface-2)] rounded-2xl p-5 border border-[var(--color-border)]">
+          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Category Trends (Month-over-Month)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {categoryTrends.map((ct) => (
+              <div key={ct.category} className="bg-[var(--color-bg-secondary)] rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">{(CATEGORY_ICONS as Record<string, string>)[ct.category] ?? '📦'}</span>
+                    <span className="text-sm font-medium text-[var(--color-text-primary)]">
+                      {(CATEGORY_LABELS as Record<string, string>)[ct.category] ?? ct.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {ct.trend === 'increasing'
+                      ? <TrendingUp size={13} className="text-red-400" />
+                      : ct.trend === 'decreasing'
+                      ? <TrendingDown size={13} className="text-green-400" />
+                      : <Minus size={13} className="text-[var(--color-text-secondary)]" />}
+                    <span className={`text-xs font-medium ${ct.changePercent > 0 ? 'text-red-400' : ct.changePercent < 0 ? 'text-green-400' : 'text-[var(--color-text-secondary)]'}`}>
+                      {ct.changePercent > 0 ? '+' : ''}{ct.changePercent}%
+                    </span>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={60}>
+                  <AreaChart data={ct.months} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={`grad-${ct.category}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={(CATEGORY_COLORS as Record<string, string>)[ct.category] ?? '#3b82f6'} stopOpacity={0.4} />
+                        <stop offset="95%" stopColor={(CATEGORY_COLORS as Record<string, string>)[ct.category] ?? '#3b82f6'} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="amount" stroke={(CATEGORY_COLORS as Record<string, string>)[ct.category] ?? '#3b82f6'} strokeWidth={1.5} fill={`url(#grad-${ct.category})`} dot={false} />
+                    <Tooltip contentStyle={{ display: 'none' }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-2">avg {formatCurrency(ct.average)}/mo</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Spending Forecaster */}
+      {forecast && forecast.forecasts.length > 0 && (
+        <div className="bg-[var(--color-surface-2)] rounded-2xl p-5 border border-[var(--color-border)]">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Next Month Forecast</h2>
+            <span className="text-xs text-[var(--color-text-secondary)]">
+              Weighted avg · {forecast.summary.monthElapsedPercent}% through month
+            </span>
+          </div>
+          <p className="text-xs text-[var(--color-text-secondary)] mb-4">
+            Projected: <span className="font-semibold text-[var(--color-text-primary)]">{formatCurrency(forecast.summary.totalForecastedMonthly)}</span>
+            {' · '}Current pace: <span className={`font-semibold ${forecast.summary.overallPacePercent > 10 ? 'text-red-400' : forecast.summary.overallPacePercent < -10 ? 'text-green-400' : 'text-[var(--color-text-primary)]'}`}>
+              {forecast.summary.overallPacePercent > 0 ? '+' : ''}{forecast.summary.overallPacePercent}%
+            </span>
+          </p>
+          <div className="space-y-3">
+            {forecast.forecasts.slice(0, 8).map((f) => (
+              <div key={f.category} className="flex items-center gap-3">
+                <span className="w-5 text-base shrink-0">{(CATEGORY_ICONS as Record<string, string>)[f.category] ?? '📦'}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-[var(--color-text-primary)] truncate">{(CATEGORY_LABELS as Record<string, string>)[f.category] ?? f.category}</span>
+                    <span className="text-xs font-medium text-[var(--color-text-primary)] shrink-0 ml-2">{formatCurrency(f.forecastedAmount)}</span>
+                  </div>
+                  <div className="h-1.5 bg-[var(--color-bg-secondary)] rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${f.pace === 'ahead' ? 'bg-red-400' : f.pace === 'behind' ? 'bg-green-400' : 'bg-[var(--color-accent)]'}`}
+                      style={{ width: `${Math.min(100, f.forecastedAmount > 0 ? (f.currentMonthSpend / f.forecastedAmount) * 100 : 0)}%` }}
+                    />
+                  </div>
+                </div>
+                <span className={`text-xs shrink-0 w-16 text-right font-medium ${f.pace === 'ahead' ? 'text-red-400' : f.pace === 'behind' ? 'text-green-400' : 'text-[var(--color-text-secondary)]'}`}>
+                  {f.pace === 'ahead' ? `+${f.pacePercent}%` : f.pace === 'behind' ? `${f.pacePercent}%` : 'on track'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Seasonality */}
+      {seasonality?.hasEnoughData && (
+        <div className="bg-[var(--color-surface-2)] rounded-2xl p-5 border border-[var(--color-border)]">
+          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">Seasonal Patterns</h2>
+          <p className="text-xs text-[var(--color-text-secondary)] mb-4">Based on your last 12 months of spending</p>
+
+          {/* Upcoming spikes alert */}
+          {(seasonality.upcomingSpikes ?? []).filter(Boolean).length > 0 && (
+            <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-xl p-3 mb-4 flex items-start gap-2">
+              <TrendingUp size={14} className="text-yellow-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-medium text-yellow-400">Upcoming spending spikes</p>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                  {(seasonality.upcomingSpikes ?? []).filter(Boolean).map((s) =>
+                    `${s!.category} in ${s!.month} (${s!.multiplier.toFixed(1)}× normal)`
+                  ).join(' · ')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {seasonality.categories.filter((c) => c.hasSeasonality).slice(0, 6).map((cat) => (
+              <div key={cat.category} className="bg-[var(--color-bg-secondary)] rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">{(CATEGORY_ICONS as Record<string, string>)[cat.category] ?? '📦'}</span>
+                    <span className="text-sm font-medium text-[var(--color-text-primary)]">
+                      {(CATEGORY_LABELS as Record<string, string>)[cat.category] ?? cat.category}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[var(--color-text-secondary)]">
+                    {cat.troughMonth} → {cat.peakMonth}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {cat.monthlyMultipliers.map(({ month, multiplier }) => (
+                    <div key={month} className="flex-1 flex flex-col items-center gap-1">
+                      <div
+                        className="w-full rounded-sm"
+                        style={{
+                          height: `${Math.max(4, multiplier * 24)}px`,
+                          background: multiplier > 1.2 ? '#f87171' : multiplier < 0.8 ? '#4ade80' : 'var(--color-accent)',
+                          opacity: multiplier === 0 ? 0.15 : 0.8,
+                        }}
+                      />
+                      <span className="text-[9px] text-[var(--color-text-secondary)]">{month.slice(0, 1)}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-2">
+                  Peak {cat.peakMultiplier.toFixed(1)}× · Trough {cat.troughMultiplier.toFixed(1)}×
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

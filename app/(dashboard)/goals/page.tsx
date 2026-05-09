@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, PlusCircle, CheckCircle2, TrendingUp, AlertTriangle, XCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,8 +11,9 @@ import PageHeader from '@/components/ui/PageHeader';
 import Modal from '@/components/ui/Modal';
 import { useGoalStore } from '@/stores/useGoalStore';
 import { useBillingStore } from '@/stores/useBillingStore';
-import { Goal } from '@/types';
+import { Goal, GoalFeasibilityResult } from '@/types';
 import { formatCurrency, formatPercentage, formatDate } from '@/lib/utils/formatters';
+import api from '@/lib/api';
 
 const GOAL_ICONS = ['🎯', '🏠', '✈️', '🚗', '💻', '🎓', '💍', '🏋️', '📚', '🎸', '🌴', '💰'];
 
@@ -190,18 +191,32 @@ function ContributeModal({ isOpen, onClose, goal }: { isOpen: boolean; onClose: 
   );
 }
 
+const FEASIBILITY_CONFIG = {
+  realistic: { label: 'Realistic', color: 'text-green-400', bg: 'bg-green-400/10', icon: TrendingUp },
+  tight:     { label: 'Tight',     color: 'text-yellow-400', bg: 'bg-yellow-400/10', icon: AlertTriangle },
+  unreachable: { label: 'Unreachable', color: 'text-red-400', bg: 'bg-red-400/10', icon: XCircle },
+  no_deadline: { label: 'No deadline', color: 'text-[var(--color-text-secondary)]', bg: 'bg-[var(--color-bg-secondary)]', icon: TrendingUp },
+};
+
 export default function GoalsPage() {
   const { goals, isLoading, fetchGoals, deleteGoal } = useGoalStore();
   const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
   const [contributeGoal, setContributeGoal] = useState<Goal | null>(null);
+  const [feasibility, setFeasibility] = useState<GoalFeasibilityResult[]>([]);
+  const [feasibilityContext, setFeasibilityContext] = useState<{ avgMonthlySavings: number; availableSavings: number } | null>(null);
 
   useEffect(() => {
     if (!isChecking && access?.hasAccess) {
       fetchGoals();
+      api.get<{ goals: GoalFeasibilityResult[]; context: { avgMonthlySavings: number; availableSavings: number } }>('/intelligence/goal-feasibility')
+        .then((r) => { setFeasibility(r.goals ?? []); setFeasibilityContext(r.context); })
+        .catch(() => {});
     }
   }, [fetchGoals, isChecking, access]);
+
+  const getFeasibility = (goalId: string) => feasibility.find((f) => f.goalId === goalId);
 
   const active = goals.filter((g) => g.status === 'active');
   const completed = goals.filter((g) => g.status === 'completed');
@@ -217,6 +232,22 @@ export default function GoalsPage() {
           </button>
         }
       />
+
+      {/* Feasibility context bar */}
+      {feasibilityContext && feasibilityContext.avgMonthlySavings > 0 && (
+        <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl px-4 py-3 mb-6 flex flex-wrap items-center gap-4 text-sm">
+          <div>
+            <span className="text-[var(--color-text-secondary)]">Avg monthly savings: </span>
+            <span className="font-semibold text-[var(--color-text-primary)]">{formatCurrency(feasibilityContext.avgMonthlySavings)}</span>
+          </div>
+          <div>
+            <span className="text-[var(--color-text-secondary)]">Available after goals: </span>
+            <span className={`font-semibold ${feasibilityContext.availableSavings >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {formatCurrency(feasibilityContext.availableSavings)}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Active goals */}
       <div className="mb-8">
@@ -292,6 +323,20 @@ export default function GoalsPage() {
                         <p className="text-base font-bold text-[var(--color-text-secondary)]">{formatCurrency(g.target_amount)}</p>
                       </div>
                     </div>
+
+                    {/* Feasibility badge */}
+                    {(() => {
+                      const f = getFeasibility(g.id);
+                      if (!f) return null;
+                      const cfg = FEASIBILITY_CONFIG[f.feasibility];
+                      const Icon = cfg.icon;
+                      return (
+                        <div className={`mt-3 rounded-lg px-3 py-2 flex items-start gap-2 ${cfg.bg}`}>
+                          <Icon size={13} className={`${cfg.color} shrink-0 mt-0.5`} />
+                          <p className={`text-xs ${cfg.color}`}>{f.message}</p>
+                        </div>
+                      );
+                    })()}
 
                     <button
                       onClick={() => setContributeGoal(g)}
