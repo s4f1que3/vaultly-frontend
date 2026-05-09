@@ -165,7 +165,14 @@ export default function TransactionsPage() {
                           {CATEGORY_ICONS[tx.category]}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{tx.description}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{tx.description}</p>
+                            {tx.member_name && !tx.is_own && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--color-info)]/10 text-[var(--color-info)] font-medium shrink-0">
+                                {tx.member_name}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-[var(--color-text-muted)]">{CATEGORY_LABELS[tx.category]}{tx.merchant ? ` · ${tx.merchant}` : ''}</p>
                         </div>
                         <div className="text-right">

@@ -26,6 +26,9 @@ const recurringSchema = z.object({
   start_date: z.string().min(1, 'Start date required'),
   end_date: z.string().optional().or(z.literal('')),
   merchant: z.string().optional(),
+  linked_category: z.string().optional(),
+  linked_type: z.enum(['income', 'expense', 'transfer']).optional(),
+  linked_budget_impact: z.enum(['increase', 'decrease', 'none']).optional(),
 });
 
 const subscriptionSchema = z.object({
@@ -156,12 +159,13 @@ function RecurringModal({ isOpen, onClose, item }: { isOpen: boolean; onClose: (
   const { customCategories, fetchCategories } = useCategoryStore();
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'recurring' | 'subscription'>('recurring');
+  const [linkedEnabled, setLinkedEnabled] = useState(false);
   const isEdit = !!item;
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
   useEffect(() => {
-    if (!isOpen) setMode('recurring');
+    if (!isOpen) { setMode('recurring'); setLinkedEnabled(false); }
   }, [isOpen]);
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<RecurringFormData>({
@@ -171,19 +175,26 @@ function RecurringModal({ isOpen, onClose, item }: { isOpen: boolean; onClose: (
 
   useEffect(() => {
     if (item) {
+      const hasLinked = !!item.linked_category;
+      setLinkedEnabled(hasLinked);
       reset({
         name: item.name, amount: item.amount, type: item.type as never,
         category: item.category, frequency: item.frequency as never,
         day_of_month: item.day_of_month ?? '', start_date: item.start_date ?? '',
         end_date: item.end_date ?? '', merchant: item.merchant ?? '',
+        linked_category: item.linked_category ?? '',
+        linked_type: (item.linked_type as never) ?? 'expense',
+        linked_budget_impact: (item.linked_budget_impact as never) ?? 'none',
       });
     } else {
+      setLinkedEnabled(false);
       reset({ type: 'expense', category: 'food', frequency: 'monthly', start_date: new Date().toISOString().split('T')[0] });
     }
   }, [item, reset, isOpen]);
 
   const frequency = watch('frequency');
   const selectedType = watch('type');
+  const linkedType = watch('linked_type');
 
   const defaultKeys = Object.keys(CATEGORY_LABELS) as TransactionCategory[];
   const allCategories = [
@@ -198,6 +209,9 @@ function RecurringModal({ isOpen, onClose, item }: { isOpen: boolean; onClose: (
         ...data,
         day_of_month: data.day_of_month ? Number(data.day_of_month) : undefined,
         end_date: data.end_date || undefined,
+        linked_category: linkedEnabled ? data.linked_category || undefined : undefined,
+        linked_type: linkedEnabled ? data.linked_type || undefined : undefined,
+        linked_budget_impact: linkedEnabled ? data.linked_budget_impact || undefined : undefined,
         merchant: data.merchant || undefined,
       };
       if (isEdit && item) await updateRecurring(item.id, payload as Partial<RecurringTransaction>);
@@ -307,6 +321,75 @@ function RecurringModal({ isOpen, onClose, item }: { isOpen: boolean; onClose: (
               <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">End date <span className="text-[var(--color-text-muted)]">(optional)</span></label>
               <input {...register('end_date')} type="date" className="input-base" />
             </div>
+          </div>
+
+          {/* Link transactions toggle */}
+          <div className="border-t border-[var(--color-border)] pt-4">
+            <button
+              type="button"
+              onClick={() => setLinkedEnabled((v) => !v)}
+              className="flex items-center justify-between w-full group"
+            >
+              <div>
+                <p className="text-xs font-medium text-[var(--color-text-secondary)] text-left">Link transactions</p>
+                <p className="text-[10px] text-[var(--color-text-muted)] text-left">Also create a second transaction in another budget</p>
+              </div>
+              <div className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${linkedEnabled ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-border)]'}`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${linkedEnabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+            </button>
+
+            {/* Linked transaction fields */}
+            {linkedEnabled && (
+              <div className="mt-4 p-3 rounded-xl bg-[var(--color-surface-2)] space-y-3">
+                <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Linked transaction</p>
+
+                {/* Linked type */}
+                <div>
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">Type</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {TYPE_CONFIG.map(({ value, label, activeClass, hoverClass }) => (
+                      <label key={value} className="cursor-pointer">
+                        <input {...register('linked_type')} type="radio" value={value} className="sr-only" />
+                        <div className={`text-center py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                          linkedType === value ? activeClass : `border-[var(--color-border)] text-[var(--color-text-secondary)] ${hoverClass}`
+                        }`}>{label}</div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Linked category */}
+                <div>
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Apply to budget</label>
+                  <select {...register('linked_category')} className="input-base">
+                    <option value="">Select category…</option>
+                    {allCategories.map((cat) => (
+                      <option key={cat} value={cat}>{CATEGORY_LABELS[cat as TransactionCategory] ?? cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Budget impact — only for transfer */}
+                {linkedType === 'transfer' && (
+                  <div>
+                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">Budget impact</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['increase', 'decrease', 'none'] as const).map((impact) => (
+                        <label key={impact} className="cursor-pointer">
+                          <input {...register('linked_budget_impact')} type="radio" value={impact} className="sr-only" />
+                          <div className={`text-center py-1.5 rounded-lg border text-xs font-medium transition-all capitalize ${
+                            watch('linked_budget_impact') === impact
+                              ? 'border-[rgba(59,130,246,0.6)] bg-[rgba(59,130,246,0.12)] text-[var(--color-info)]'
+                              : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[rgba(59,130,246,0.3)]'
+                          }`}>{impact}</div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <button type="submit" disabled={isLoading} className="btn-primary w-full">

@@ -113,8 +113,8 @@ export default function HouseholdPage() {
                       {m.role === 'owner' ? <Crown size={14} className="text-yellow-400" /> : '👤'}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-[var(--color-text-primary)]">{m.user_id.slice(0, 8)}…</p>
-                      <p className="text-xs text-[var(--color-text-secondary)] capitalize">{m.role}</p>
+                      <p className="text-sm font-medium text-[var(--color-text-primary)]">{m.name ?? m.full_name ?? m.email ?? m.user_id.slice(0, 8)}</p>
+                      <p className="text-xs text-[var(--color-text-secondary)]">{m.email && m.name ? m.email : ''} <span className="capitalize">{m.role}</span></p>
                     </div>
                     {role === 'owner' && m.role !== 'owner' && (
                       <button onClick={() => removeMember(m.user_id)} className="text-[var(--color-text-secondary)] hover:text-red-400">

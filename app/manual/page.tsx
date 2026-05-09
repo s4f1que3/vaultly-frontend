@@ -8,7 +8,7 @@ const sections = [
     content: [
       {
         heading: 'Add your first card',
-        body: 'Go to Cards and hit "Add Card". Enter your last 4 digits, card type (Visa/Mastercard/Amex), and starting balance. Vaultly uses this balance as your financial baseline — all transactions adjust it automatically.',
+        body: 'Go to Cards and hit "Add Card". Enter your last 4 digits, card type, starting balance, and optionally link the card to a savings pot (if your card and pot represent the same money — this prevents double-counting in Net Worth). Vaultly uses the card balance as your financial baseline and adjusts it automatically as you log transactions.',
       },
       {
         heading: 'Set up your categories',
@@ -21,8 +21,31 @@ const sections = [
     ],
   },
   {
-    id: 'transactions',
+    id: 'cards',
     icon: '💳',
+    title: 'Cards',
+    content: [
+      {
+        heading: 'Managing cards',
+        body: 'Each card tracks its balance dynamically — the starting balance you enter plus all income and expense transactions linked to it. The Cards page always shows the live adjusted balance, not just the stored one.',
+      },
+      {
+        heading: 'Editing a card',
+        body: 'Open a card and hit the edit (pencil) icon. You can update the card holder name, expiry, theme, current balance, and credit limit. Updating the balance sets a new baseline — subsequent transactions adjust from there.',
+      },
+      {
+        heading: 'Linking to a savings pot',
+        body: 'If a savings pot and a card represent the same real bank account (e.g. your current account pot and its debit card), link them in the Edit Card modal. When linked, Net Worth counts only the pot balance — the card balance is excluded to prevent double-counting. A link indicator appears below the card on the Cards page.',
+      },
+      {
+        heading: 'Card detail page',
+        body: 'Click any card to see a full transaction history for that card, total spent, total income, and a link indicator if the card is tied to a savings pot.',
+      },
+    ],
+  },
+  {
+    id: 'transactions',
+    icon: '↕️',
     title: 'Transactions',
     content: [
       {
@@ -35,7 +58,11 @@ const sections = [
       },
       {
         heading: 'CSV import',
-        body: 'Export a statement from your bank (most banks offer this under "Download transactions") and drag it into the import modal on the Transactions page. Vaultly auto-detects date, amount, and description columns and suggests categories. You can edit each row before confirming.',
+        body: 'Export a statement from your bank (most banks offer this under "Download transactions") and drag the CSV into the import modal on the Transactions page. Vaultly handles Windows line endings, quoted fields with commas, and flexible column names — it auto-detects date, amount, and description and suggests a category per row. Edit any row before confirming.',
+      },
+      {
+        heading: 'Household transactions',
+        body: 'If you are in a household, transactions from all members appear in your feed. Each non-own transaction shows a small name badge (e.g. "Sarah") so you always know who made it.',
       },
       {
         heading: 'Filters & search',
@@ -51,6 +78,10 @@ const sections = [
       {
         heading: 'Creating budgets',
         body: 'Set a monthly spending limit per category. Vaultly tracks your actual spend against each limit in real time as you log transactions.',
+      },
+      {
+        heading: 'Household budgets',
+        body: 'When you are in a household, each budget\'s spent amount reflects the combined spending of all household members for that category — not just your own. A small "household" badge appears on the budget card when this is active.',
       },
       {
         heading: 'Alert threshold',
@@ -76,20 +107,28 @@ const sections = [
     title: 'Recurring Transactions',
     content: [
       {
-        heading: 'What are recurring transactions?',
-        body: 'Any fixed income or expense that repeats on a schedule — rent, salary, subscriptions, loan repayments. Set it once and Vaultly auto-logs it each period so your history stays accurate without manual entry.',
+        heading: 'Recurring vs subscription',
+        body: 'The New Recurring modal has two modes. "Recurring" is for any repeating income or expense (rent, salary, loan repayments) with full frequency control. "Subscription" is for services billed monthly or yearly (Netflix, iCloud, Adobe) — Vaultly auto-bills these on their exact due date and advances the billing date each cycle.',
+      },
+      {
+        heading: 'Monthly totals summary',
+        body: 'The top of the Recurring page shows three stat cards: Subscriptions/mo (monthly cost of all active subscriptions, yearly ones divided by 12), Recurring/mo (monthly equivalent of active recurring expenses), and Total/mo (combined). This gives you an instant picture of your fixed monthly commitments.',
       },
       {
         heading: 'Frequencies',
-        body: 'Choose from daily, weekly, every 2 weeks, monthly, or yearly. For monthly, you can specify the exact day of month (e.g. rent on the 1st, salary on the 25th).',
+        body: 'Choose from daily, weekly, every 2 weeks, monthly, or yearly. For monthly you can specify the exact day of month (e.g. rent on the 1st, salary on the 25th). Subscriptions use monthly or yearly only.',
+      },
+      {
+        heading: 'Link transactions',
+        body: 'Toggle "Link transactions" in the recurring form to create a second automatic transaction on the same date — in a different budget category. For example: primary transaction = Transfer type on your Transfer budget (outflow), linked transaction = Income on your General budget (inflow). The linked transaction can have its own type (expense/income/transfer) and, if transfer, a budget impact (increase/decrease/none).',
       },
       {
         heading: 'Pausing vs deleting',
-        body: 'Toggle the switch on any recurring item to pause it — it stops auto-logging but keeps the record. Delete it if you\'ve cancelled the subscription or expense entirely.',
+        body: 'Toggle the switch on any recurring item to pause it — it stops auto-logging but keeps the record. Delete it if you\'ve cancelled the commitment entirely. Subscriptions and recurring transactions can both be paused from this page.',
       },
       {
         heading: 'End date',
-        body: 'Set an end date for finite commitments (e.g. a 12-month loan). Vaultly automatically deactivates it when the end date passes.',
+        body: 'Set an end date for finite commitments (e.g. a 12-month loan). Vaultly automatically deactivates the recurring when the end date passes.',
       },
     ],
   },
@@ -104,7 +143,7 @@ const sections = [
       },
       {
         heading: 'Feasibility score',
-        body: 'Each goal shows a Realistic, Tight, or Unreachable badge based on your current savings rate and how much needs to be saved per month to hit the deadline. Tap the badge to see the breakdown.',
+        body: 'Each goal shows a Realistic, Tight, or Unreachable badge based on your current savings rate and how much needs to be saved per month to hit the deadline.',
       },
       {
         heading: 'Contributing',
@@ -123,11 +162,15 @@ const sections = [
     content: [
       {
         heading: 'Savings pots',
-        body: 'Think of pots as virtual envelopes — separate buckets for different purposes (e.g. Emergency Fund, Holiday, New Laptop). They don\'t have a target or deadline, just a growing balance.',
+        body: 'Think of pots as virtual envelopes — separate buckets for different purposes (e.g. Emergency Fund, Holiday, New Laptop). They don\'t have a target or deadline, just a growing balance. Pots count toward your Net Worth as assets.',
+      },
+      {
+        heading: 'Linking a pot to a card',
+        body: 'If a pot represents the same money as a debit card (e.g. your current account), link them in the Edit Card modal. When linked, Net Worth only counts the pot — the card balance is excluded, preventing double-counting.',
       },
       {
         heading: 'Auto-transfer rules',
-        body: 'Create rules that automatically move money into a pot. Choose monthly (runs on the 1st), on income (fires when income is detected), or percentage of income. Rules run in the background.',
+        body: 'Create rules that automatically move money into a pot. Choose monthly (runs on the 1st), on income (fires when income is detected), or percentage of income. Rules run in the background without any manual steps.',
       },
     ],
   },
@@ -138,30 +181,50 @@ const sections = [
     content: [
       {
         heading: 'How it\'s calculated',
-        body: 'Assets = card balances + savings pots + goal savings. Liabilities = anything you add manually (mortgages, loans, credit card debt). Net Worth = Assets − Liabilities.',
+        body: 'Assets = card balances (transaction-adjusted) + savings pots + goal savings. Cards that are linked to a savings pot are excluded from the card balance total to prevent double-counting. Liabilities = debts you add manually. Net Worth = Assets − Liabilities.',
+      },
+      {
+        heading: 'Avoiding double-counting',
+        body: 'If your savings pot and debit card represent the same bank account, link the card to the pot via Edit Card. Net Worth will then count only the pot, not the card, keeping your figure accurate.',
       },
       {
         heading: 'Adding liabilities',
-        body: 'Hit "Add Liability" and enter the balance, interest rate, and minimum payment. Keep balances updated as you pay down debt for an accurate net worth figure.',
+        body: 'Hit "Add Liability" and choose a type (Mortgage, Auto Loan, Student Loan, Credit Card, Personal Loan, Other). Enter the balance, interest rate, and minimum monthly payment. The type selector uses icon cards for quick selection.',
+      },
+      {
+        heading: 'Keeping it current',
+        body: 'Card balances update automatically as you log transactions. Savings pot and liability balances are manually maintained — update them whenever you make a significant payment or deposit.',
       },
     ],
   },
   {
     id: 'debt-planner',
     icon: '📉',
-    title: 'Debt Payoff Planner',
+    title: 'Debt Planner',
     content: [
       {
-        heading: 'Avalanche vs Snowball',
-        body: 'Avalanche pays off your highest-interest debt first — minimises total interest paid. Snowball pays smallest balance first — gives quicker psychological wins. Vaultly shows you both payoff dates and total interest so you can choose.',
+        heading: 'Two tabs: Loan Calculator and Payoff Planner',
+        body: 'The Debt Planner has two modes. Loan Calculator is a standalone tool for calculating any loan — no existing debts required. Payoff Planner uses the liabilities from your Net Worth page to build a payoff schedule for your real debts.',
       },
       {
-        heading: 'Monthly budget',
-        body: 'Enter how much you can put toward debt repayment each month (must be at least the sum of all minimum payments). Vaultly shows your debt-free date and a month-by-month payoff chart.',
+        heading: 'Loan Calculator — monthly payment',
+        body: 'Enter a loan amount, interest rate, optional down payment, and pick a term (5/10/15/20/25/30 years). The calculator instantly shows your monthly payment, total interest paid, total cost, and a principal-vs-interest bar. Everything updates live as you type.',
       },
       {
-        heading: 'Debts come from Net Worth',
-        body: 'The planner uses the liabilities you\'ve entered on the Net Worth page. Keep those balances current for accurate projections.',
+        heading: 'Purchasing power',
+        body: 'Enter a monthly budget you can afford and the calculator tells you the maximum loan you can take on at the current rate and term. Add a down payment and it shows the total purchase price (loan + down payment). Useful for house or car shopping — know your ceiling before you browse.',
+      },
+      {
+        heading: 'Pay it off early',
+        body: 'Enter an extra monthly payment amount and see exactly how much interest you save and how many months earlier you\'d be debt-free. The amortization chart updates to reflect the shorter timeline.',
+      },
+      {
+        heading: 'Term comparison table',
+        body: 'All six standard terms (5–30 years) are shown side by side with monthly payment, total interest, and total cost. The currently selected term is highlighted so you can see the trade-offs at a glance.',
+      },
+      {
+        heading: 'Payoff Planner — Avalanche vs Snowball',
+        body: 'Avalanche pays your highest-interest debt first (minimises total interest). Snowball pays smallest balance first (quicker wins). Set your monthly repayment budget, choose a strategy, and Vaultly shows your debt-free date, total interest paid, and a balance-over-time chart.',
       },
     ],
   },
@@ -172,15 +235,19 @@ const sections = [
     content: [
       {
         heading: 'What it shows',
-        body: 'A day-by-day balance projection for the next 30, 60, or 90 days — accounting for your average daily spend, upcoming subscriptions/recurring transactions, and detected income patterns.',
+        body: 'A day-by-day balance projection for the next 30, 60, or 90 days — starting from your actual current balance (card balances adjusted for all transactions), then applying your average daily spend, upcoming subscriptions, and detected recurring income patterns.',
+      },
+      {
+        heading: 'How the current balance is calculated',
+        body: 'Cash Flow reads your card\'s stored balance and adds all transaction deltas on top. This means the starting point reflects your real money, not just what you typed when you created the card.',
       },
       {
         heading: 'Low balance warnings',
-        body: 'Days where your balance is projected to drop below $200 are flagged in red. The first warning date and total low-balance days are shown in the summary cards.',
+        body: 'Days where your balance is projected to drop below $200 are flagged. The summary shows how many low-balance days there are and the first date it occurs. The warning is driven by your spending pattern — adding income raises your starting balance but if your daily burn is high the projection will still show a decline.',
       },
       {
-        heading: 'Events',
-        body: 'Scroll the events list to see which specific bills or income deposits are driving balance changes on any given day.',
+        heading: 'Events list',
+        body: 'Scroll the Upcoming Events list to see which specific bills or income deposits affect your balance on any given day. Expected income appears when Vaultly detects you\'ve received income on the same day of the month at least twice in the past 90 days.',
       },
     ],
   },
@@ -191,15 +258,15 @@ const sections = [
     content: [
       {
         heading: 'Spending forecast',
-        body: 'Uses a weighted moving average across your last 6 months (recent months count more) to predict next month\'s spend per category. The pace indicator shows whether you\'re spending faster or slower than your forecast this month.',
+        body: 'Uses a weighted moving average across your last 6 months (recent months count more) to predict next month\'s spend per category. The pace indicator on each budget shows whether you\'re spending faster or slower than forecast this month.',
       },
       {
         heading: 'Category trends',
-        body: 'Month-over-month sparklines per category with a trend arrow. Red = increasing, green = decreasing.',
+        body: 'Month-over-month sparklines per category with a trend arrow. Red = increasing spend, green = decreasing.',
       },
       {
         heading: 'Anomaly detection',
-        body: 'Vaultly flags price spikes (a merchant charged significantly more than usual), new recurring charges (a merchant appearing multiple times for the first time), and unusually large transactions.',
+        body: 'Vaultly flags price spikes (a merchant charged significantly more than usual), new recurring charges (a merchant appearing multiple times for the first time), and unusually large one-off transactions.',
       },
       {
         heading: 'Seasonality',
@@ -214,7 +281,7 @@ const sections = [
     content: [
       {
         heading: 'What is it?',
-        body: 'A 0–100 score (with a letter grade A–F) that summarises your financial wellbeing across five areas. It updates automatically as your data changes.',
+        body: 'A 0–100 score (with a letter grade A–F) that summarises your financial wellbeing across five areas. It updates automatically as your data changes and appears on the dashboard.',
       },
       {
         heading: 'The five components',
@@ -225,19 +292,31 @@ const sections = [
   {
     id: 'household',
     icon: '👨‍👩‍👧',
-    title: 'Household (Shared Budgets)',
+    title: 'Household',
     content: [
       {
         heading: 'Creating a household',
-        body: 'Go to the Household page and create one. You\'re the owner. There can only be one household per account.',
+        body: 'Go to the Household page and create one with a name. You become the owner. There can only be one household per account.',
       },
       {
         heading: 'Inviting members',
-        body: 'Enter their email address. They\'ll receive an invite email with a link to accept. Once they log in and accept, they\'re part of the household.',
+        body: 'Enter a member\'s email address. They receive an invite email. Once they log in and accept, they join the household and data sharing activates immediately.',
+      },
+      {
+        heading: 'What gets shared',
+        body: 'Everyone operates independently — their own cards, budgets, goals, and settings. What changes: Transactions from all members appear in your feed (tagged with the member\'s name). Budget spending totals aggregate across all members — so if your Food budget is $600 and two people spend $200 each, it shows $400 spent total with a "household" badge.',
+      },
+      {
+        heading: 'What stays private',
+        body: 'Cards, savings pots, goals, and settings remain individual. Net Worth is calculated per person. Each person only sees transactions in their own feed (plus household members\').',
+      },
+      {
+        heading: 'Member display',
+        body: 'The Household page shows each member\'s real name and email address (not a truncated ID). The owner is marked with a crown icon.',
       },
       {
         heading: 'Leaving or deleting',
-        body: 'Members can leave at any time. Only the owner can delete the household. Deleting removes all members.',
+        body: 'Members can leave at any time. Only the owner can delete the household — this removes all members instantly.',
       },
     ],
   },

@@ -286,7 +286,12 @@ export default function BudgetsPage() {
                         {CATEGORY_ICONS[b.category]}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-text-primary)]">{CATEGORY_LABELS[b.category]}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-[var(--color-text-primary)]">{CATEGORY_LABELS[b.category]}</p>
+                          {b.is_household && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--color-info)]/10 text-[var(--color-info)] font-medium">household</span>
+                          )}
+                        </div>
                         <p className="text-xs text-[var(--color-text-muted)] capitalize">{b.period}</p>
                       </div>
                     </div>

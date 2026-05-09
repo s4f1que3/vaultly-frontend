@@ -9,13 +9,16 @@ import Modal from '@/components/ui/Modal';
 import CreditCard from '@/components/cards/CreditCard';
 import { Card, CardTheme } from '@/types';
 import { useCardStore } from '@/stores/useCardStore';
+import { useSavingsStore } from '@/stores/useSavingsStore';
 
 const schema = z.object({
   card_holder: z.string().min(2, 'Required'),
   expiry_month: z.string().min(1, 'Required').max(2),
   expiry_year: z.string().length(4, 'Enter 4-digit year'),
   theme: z.enum(['green', 'dark', 'brown', 'purple', 'gold']),
+  balance: z.coerce.number(),
   credit_limit: z.coerce.number().min(0),
+  savings_pot_id: z.string().optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -35,7 +38,10 @@ interface EditCardModalProps {
 
 export default function EditCardModal({ card, isOpen, onClose }: EditCardModalProps) {
   const { updateCard } = useCardStore();
+  const { pots, fetchPots } = useSavingsStore();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => { fetchPots(); }, [fetchPots]);
 
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,11 +51,13 @@ export default function EditCardModal({ card, isOpen, onClose }: EditCardModalPr
   useEffect(() => {
     if (card) {
       reset({
-        card_holder:  card.card_holder,
-        expiry_month: card.expiry_month,
-        expiry_year:  card.expiry_year,
-        theme:        card.theme,
-        credit_limit: card.credit_limit ?? 0,
+        card_holder:    card.card_holder,
+        expiry_month:   card.expiry_month,
+        expiry_year:    card.expiry_year,
+        theme:          card.theme,
+        balance:        card.balance ?? 0,
+        credit_limit:   card.credit_limit ?? 0,
+        savings_pot_id: card.savings_pot_id ?? '',
       });
     }
   }, [card, reset]);
@@ -69,11 +77,13 @@ export default function EditCardModal({ card, isOpen, onClose }: EditCardModalPr
     setIsLoading(true);
     try {
       await updateCard(card.id, {
-        card_holder:  data.card_holder,
-        expiry_month: data.expiry_month,
-        expiry_year:  data.expiry_year,
-        theme:        data.theme,
-        credit_limit: data.credit_limit,
+        card_holder:    data.card_holder,
+        expiry_month:   data.expiry_month,
+        expiry_year:    data.expiry_year,
+        theme:          data.theme,
+        balance:        data.balance,
+        credit_limit:   data.credit_limit,
+        savings_pot_id: data.savings_pot_id || null,
       });
       onClose();
     } finally {
@@ -132,11 +142,36 @@ export default function EditCardModal({ card, isOpen, onClose }: EditCardModalPr
           </div>
         </div>
 
-        {/* Credit limit — only for credit cards */}
-        {card?.card_kind !== 'debit' && (
+        {/* Balance + Credit limit */}
+        <div className={`grid gap-3 ${card?.card_kind !== 'debit' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Credit limit ($)</label>
-            <input {...register('credit_limit')} type="number" step="0.01" placeholder="5000.00" className="input-base" />
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Current balance ($)</label>
+            <input {...register('balance')} type="number" step="0.01" placeholder="0.00" className="input-base" />
+            {errors.balance && <p className="text-[var(--color-danger)] text-xs mt-1">{errors.balance.message}</p>}
+          </div>
+          {card?.card_kind !== 'debit' && (
+            <div>
+              <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Credit limit ($)</label>
+              <input {...register('credit_limit')} type="number" step="0.01" placeholder="5000.00" className="input-base" />
+            </div>
+          )}
+        </div>
+
+        {/* Linked savings pot */}
+        {pots.length > 0 && (
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">
+              Linked savings pot <span className="text-[var(--color-text-muted)]">(optional)</span>
+            </label>
+            <select {...register('savings_pot_id')} className="input-base">
+              <option value="">None — count card balance in net worth</option>
+              {pots.map((p) => (
+                <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>
+              ))}
+            </select>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+              If this card is funded by a savings pot, link them so net worth isn&apos;t counted twice.
+            </p>
           </div>
         )}
 

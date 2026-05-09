@@ -7,6 +7,7 @@ import { ArrowLeft, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-reac
 import CreditCard from '@/components/cards/CreditCard';
 import { useCardStore } from '@/stores/useCardStore';
 import { useBillingStore } from '@/stores/useBillingStore';
+import { useSavingsStore } from '@/stores/useSavingsStore';
 import { Transaction } from '@/types';
 import api from '@/lib/api';
 import {
@@ -53,7 +54,11 @@ export default function CardDetailPage() {
       .finally(() => setIsLoading(false));
   }, [id, page, isChecking, access]);
 
+  const { pots, fetchPots } = useSavingsStore();
+  useEffect(() => { fetchPots(); }, [fetchPots]);
+
   const card = cards.find((c) => c.id === id);
+  const linkedPot = card?.savings_pot_id ? pots.find((p) => p.id === card.savings_pot_id) : null;
 
   const totalSpent   = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const totalIncome  = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
@@ -77,6 +82,16 @@ export default function CardDetailPage() {
           className="mb-8"
         >
           <CreditCard card={card} />
+
+          {/* Linked pot badge */}
+          {linkedPot && (
+            <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-surface-2)] w-fit">
+              <span className="text-base">{linkedPot.emoji}</span>
+              <span className="text-xs text-[var(--color-text-secondary)]">
+                Linked to <span className="font-medium text-[var(--color-text-primary)]">{linkedPot.name}</span> — balance excluded from net worth
+              </span>
+            </div>
+          )}
 
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-5">

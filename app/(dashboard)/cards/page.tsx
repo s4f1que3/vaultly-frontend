@@ -10,6 +10,7 @@ import AddCardModal from '@/components/cards/AddCardModal';
 import EditCardModal from '@/components/cards/EditCardModal';
 import { useCardStore } from '@/stores/useCardStore';
 import { useBillingStore } from '@/stores/useBillingStore';
+import { useSavingsStore } from '@/stores/useSavingsStore';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { Card } from '@/types';
@@ -17,6 +18,7 @@ import { Card } from '@/types';
 export default function CardsPage() {
   const { cards, isLoading, fetchCards, deleteCard, setDefault } = useCardStore();
   const { isChecking, access } = useBillingStore();
+  const { pots, fetchPots } = useSavingsStore();
   const [showAdd, setShowAdd] = useState(false);
   const [editCard, setEditCard] = useState<Card | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
@@ -25,8 +27,9 @@ export default function CardsPage() {
   useEffect(() => {
     if (!isChecking && access?.hasAccess) {
       fetchCards();
+      fetchPots();
     }
-  }, [fetchCards, isChecking, access]);
+  }, [fetchCards, fetchPots, isChecking, access]);
 
   const totalBalance = cards.reduce((s, c) => s + c.balance, 0);
   const defaultCard = cards.find((c) => c.is_default);
@@ -134,6 +137,17 @@ export default function CardsPage() {
                 </div>
 
                 <CreditCard card={card} mini />
+
+                {/* Linked savings pot indicator */}
+                {card.savings_pot_id && (() => {
+                  const pot = pots.find((p) => p.id === card.savings_pot_id);
+                  return pot ? (
+                    <div className="mt-3 flex items-center gap-1.5 text-[10px] text-[var(--color-text-muted)]">
+                      <span>{pot.emoji}</span>
+                      <span>Linked to <span className="text-[var(--color-text-secondary)] font-medium">{pot.name}</span></span>
+                    </div>
+                  ) : null;
+                })()}
 
                 {card.card_kind !== 'debit' && (
                   <div className="mt-4 grid grid-cols-2 gap-3">

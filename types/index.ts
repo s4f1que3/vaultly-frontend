@@ -26,6 +26,7 @@ export interface Card {
   balance: number;
   credit_limit: number;
   is_default: boolean;
+  savings_pot_id?: string | null;
   created_at: string;
 }
 
@@ -50,6 +51,8 @@ export interface Transaction {
   date: string;
   budget_impact?: BudgetImpact;
   created_at: string;
+  member_name?: string;
+  is_own?: boolean;
 }
 
 export interface TransactionFilters {
@@ -75,7 +78,8 @@ export interface Budget {
   rollover_amount: number;
   rollover_enabled: boolean;
   period: 'monthly' | 'weekly' | 'yearly';
-  alert_threshold: number; // percentage (e.g. 80)
+  alert_threshold: number;
+  is_household?: boolean;
   created_at: string;
 }
 
@@ -580,6 +584,9 @@ export interface RecurringTransaction {
   source: 'recurring' | 'subscription';
   icon?: string;
   color?: string;
+  linked_category?: string;
+  linked_type?: 'income' | 'expense' | 'transfer';
+  linked_budget_impact?: 'increase' | 'decrease' | 'none';
   created_at: string;
 }
 
@@ -594,6 +601,12 @@ export interface Liability {
   balance: number;
   interest_rate: number;
   minimum_payment: number;
+  original_amount?: number;
+  down_payment?: number;
+  term_years?: number;
+  start_date?: string;
+  budget_category?: string;
+  recurring_transaction_id?: string;
   created_at: string;
 }
 
@@ -720,6 +733,7 @@ export interface HouseholdMember {
   household_id: string;
   user_id: string;
   email: string;
+  name?: string;
   full_name?: string;
   role: HouseholdRole;
   joined_at: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import Modal from '@/components/ui/Modal';
 import CreditCard from '@/components/cards/CreditCard';
 import { CardType, CardTheme, CardKind } from '@/types';
 import { useCardStore } from '@/stores/useCardStore';
+import { useSavingsStore } from '@/stores/useSavingsStore';
 
 const schema = z.object({
   card_holder: z.string().min(2, 'Required'),
@@ -20,6 +21,7 @@ const schema = z.object({
   theme: z.enum(['green', 'dark', 'brown', 'purple', 'gold']),
   balance: z.coerce.number().min(0),
   credit_limit: z.coerce.number().min(0),
+  savings_pot_id: z.string().optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -38,7 +40,10 @@ interface AddCardModalProps {
 
 export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
   const { addCard } = useCardStore();
+  const { pots, fetchPots } = useSavingsStore();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => { fetchPots(); }, [fetchPots]);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,7 +62,7 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      await addCard(data);
+      await addCard({ ...data, savings_pot_id: data.savings_pot_id || null });
       onClose();
     } finally {
       setIsLoading(false);
@@ -163,6 +168,24 @@ export default function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
             </div>
           )}
         </div>
+
+        {/* Linked savings pot */}
+        {pots.length > 0 && (
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">
+              Linked savings pot <span className="text-[var(--color-text-muted)]">(optional)</span>
+            </label>
+            <select {...register('savings_pot_id')} className="input-base">
+              <option value="">None — count card balance in net worth</option>
+              {pots.map((p) => (
+                <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>
+              ))}
+            </select>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+              If this card is funded by a savings pot, link them so net worth isn&apos;t counted twice.
+            </p>
+          </div>
+        )}
 
         <button type="submit" disabled={isLoading} className="btn-primary w-full">
           {isLoading ? <><Loader2 size={16} className="animate-spin" /> Adding...</> : 'Add Card'}
