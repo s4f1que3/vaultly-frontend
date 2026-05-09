@@ -572,11 +572,14 @@ export interface RecurringTransaction {
   frequency: RecurringFrequency;
   day_of_month?: number;
   day_of_week?: number;
-  start_date: string;
+  start_date?: string;
   end_date?: string;
   next_due_date: string;
   last_processed_date?: string;
   is_active: boolean;
+  source: 'recurring' | 'subscription';
+  icon?: string;
+  color?: string;
   created_at: string;
 }
 

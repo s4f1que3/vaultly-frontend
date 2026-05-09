@@ -32,6 +32,15 @@ export default function Footer() {
         </a>
 
         <Link
+          href="/manual"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
+        >
+          Manual
+        </Link>
+
+        <Link
           href="/terms"
           target="_blank"
           rel="noopener noreferrer"
