@@ -89,7 +89,7 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           <Link href="/" className="text-xl font-bold text-gradient">
-            Vaultly
+            Vaultly™
           </Link>
 
           {/* Desktop menu */}
@@ -213,7 +213,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-8 leading-relaxed">
-                Vaultly is the premium personal finance app that gives you complete visibility into your spending,
+                Vaultly™ is the premium personal finance app that gives you complete visibility into your spending,
                 helps you build budgets that actually work, and empowers you to achieve your financial goals.
               </p>
 
@@ -273,10 +273,10 @@ export default function HomePage() {
               className="text-center mb-12 sm:mb-16"
             >
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] mb-4">
-                What is Vaultly?
+                What is Vaultly™?
               </h2>
               <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-                Vaultly is your all-in-one personal finance companion. Track expenses, set budgets, achieve goals,
+                Vaultly™ is your all-in-one personal finance companion. Track expenses, set budgets, achieve goals,
                 and understand your spending patterns — all with military-grade security.
               </p>
             </motion.div>
@@ -497,7 +497,7 @@ export default function HomePage() {
               className="text-center mb-12 sm:mb-16"
             >
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] mb-4">
-                Why Choose Vaultly?
+                Why Choose Vaultly™?
               </h2>
             </motion.div>
 
@@ -592,7 +592,7 @@ export default function HomePage() {
                 Ready to Take Control of Your Finances?
               </h2>
               <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-8">
-                Join Vaultly today and start your journey toward financial clarity and confidence.
+                Join Vaultly™ today and start your journey toward financial clarity and confidence.
               </p>
 
               <motion.div

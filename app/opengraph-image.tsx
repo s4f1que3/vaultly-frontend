@@ -58,7 +58,7 @@ export default function OgImage() {
               lineHeight: 1,
             }}
           >
-            Vaultly
+            Vaultly™
           </span>
         </div>
 

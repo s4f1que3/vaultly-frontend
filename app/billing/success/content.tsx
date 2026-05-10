@@ -80,7 +80,7 @@ export default function BillingSuccessContent() {
             </div>
             <h1 className="text-xl font-bold text-[var(--color-text-primary)]">You&apos;re in!</h1>
             <p className="text-sm text-[var(--color-text-secondary)] mt-2">
-              Welcome to Vaultly Premium. Redirecting to your dashboard…
+              Welcome to Vaultly™ Premium. Redirecting to your dashboard…
             </p>
           </motion.div>
         )}

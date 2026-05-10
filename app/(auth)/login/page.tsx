@@ -68,7 +68,7 @@ export default function LoginPage() {
             Welcome back
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            Sign in to your Vaultly account
+            Sign in to your Vaultly™ account
           </p>
         </div>
 
@@ -166,7 +166,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
-          Plan, Track, Save — with Vaultly
+          Plan, Track, Save — with Vaultly™
         </p>
       </motion.div>
     </div>

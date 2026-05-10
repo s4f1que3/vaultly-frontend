@@ -21,7 +21,7 @@ export default function Footer() {
     <footer className="w-full border-t border-[var(--color-border)] py-5 px-6">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-[var(--color-text-muted)]">
-          © {new Date().getFullYear()} Vaultly. All rights reserved.
+          © {new Date().getFullYear()} Vaultly™. All rights reserved.
         </p>
 
         <a

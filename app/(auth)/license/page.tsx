@@ -6,7 +6,7 @@ import { ShoppingBag, KeyRound, ArrowLeft, Infinity, Check } from 'lucide-react'
 
 const PERKS = [
   'One-time payment — no recurring fees',
-  'Full access to every Vaultly feature',
+  'Full access to every Vaultly™ feature',
   'All future updates included',
   'Lifetime account, never expires',
 ];

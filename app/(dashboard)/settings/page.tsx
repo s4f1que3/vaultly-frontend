@@ -123,7 +123,7 @@ function BillingSection() {
           </span>
         </div>
         <p className="text-sm text-[var(--color-text-secondary)]">
-          You have lifetime access to Vaultly. No recurring charges will ever be applied to your account.
+          You have lifetime access to Vaultly™. No recurring charges will ever be applied to your account.
         </p>
       </div>
     );
@@ -166,7 +166,7 @@ function BillingSection() {
             </div>
             <div>
               <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                Vaultly {subscription.plan === 'monthly' ? 'Monthly' : 'Yearly'}
+                Vaultly™ {subscription.plan === 'monthly' ? 'Monthly' : 'Yearly'}
               </p>
               <p className="text-xs text-[var(--color-text-muted)]">
                 {subscription.plan === 'monthly' ? '$8.00 / month' : '$100.00 / year'}
@@ -492,7 +492,7 @@ function PaymentRow({ record }: { record: PaymentRecord }) {
         )}
         <div>
           <p className="text-xs font-medium text-[var(--color-text-primary)]">
-            {record.description || `Vaultly ${record.plan} subscription`}
+            {record.description || `Vaultly™ ${record.plan} subscription`}
           </p>
           <p className="text-xs text-[var(--color-text-muted)]">
             {format(parseISO(record.billing_date + 'T00:00:00'), 'MMM d, yyyy')}

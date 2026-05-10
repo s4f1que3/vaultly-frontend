@@ -57,7 +57,7 @@ function Sidebar() {
     <aside className="hidden lg:flex flex-col w-[220px] min-h-screen border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-3 py-6 fixed left-0 top-0 z-40">
       <Link href="/dashboard" className="flex items-center gap-3 px-2 mb-8">
         <Image src="/logo.png" alt="Vaultly" width={32} height={32} className="rounded-lg" />
-        <span className="font-bold text-base text-[var(--color-text-primary)] tracking-tight">Vaultly</span>
+        <span className="font-bold text-base text-[var(--color-text-primary)] tracking-tight">Vaultly™</span>
       </Link>
 
       <nav className="flex flex-col gap-1 flex-1">

@@ -146,7 +146,7 @@ export default function LicensePurchasePage() {
           {/* Price summary */}
           <div className="bg-[var(--color-surface)] rounded-xl p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[var(--color-text-primary)]">Vaultly Lifetime License</p>
+              <p className="text-sm font-medium text-[var(--color-text-primary)]">Vaultly™ Lifetime License</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5">One-time · Never expires</p>
             </div>
             <span className="text-xl font-bold text-[var(--color-text-primary)]">$2000</span>

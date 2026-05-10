@@ -410,7 +410,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
-          Plan, Track, Save — with Vaultly
+          Plan, Track, Save — with Vaultly™
         </p>
       </motion.div>
     </div>

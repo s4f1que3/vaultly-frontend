@@ -6,8 +6,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vaultly.app';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Vaultly — Personal Budget Tracker & Finance App',
-    template: '%s | Vaultly',
+    default: 'Vaultly™ — Personal Budget Tracker & Finance App',
+    template: '%s | Vaultly™',
   },
   description:
     'Vaultly is a premium personal finance app to track expenses, set budgets, manage savings goals, and understand your spending — all in one place.',
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'Vaultly',
-    title: 'Vaultly — Personal Budget Tracker & Finance App',
+    siteName: 'Vaultly™',
+    title: 'Vaultly™ — Personal Budget Tracker & Finance App',
     description:
       'Track expenses, set budgets, manage savings goals, and understand your spending — all in one place.',
     url: siteUrl,
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Vaultly — Personal Budget Tracker & Finance App',
+    title: 'Vaultly™ — Personal Budget Tracker & Finance App',
     description:
       'Track expenses, set budgets, manage savings goals, and understand your spending — all in one place.',
     images: ['/opengraph-image'],

@@ -57,7 +57,7 @@ const CONFIG: Record<string, {
     iconColor: 'text-[var(--color-accent)]',
     iconBg: 'bg-[var(--color-accent-dim)]',
     title: 'Subscription required',
-    description: () => 'Vaultly is a premium app. Subscribe to get full access to all features.',
+    description: () => 'Vaultly™ is a premium app. Subscribe to get full access to all features.',
   },
 };
 

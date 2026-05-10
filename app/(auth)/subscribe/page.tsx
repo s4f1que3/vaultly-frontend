@@ -289,7 +289,7 @@ export default function SubscribePage() {
             Choose your plan
           </h1>
           <p className="text-[var(--color-text-secondary)] text-sm max-w-md mx-auto">
-            Full access to every Vaultly feature. Cancel anytime, no questions asked.
+            Full access to every Vaultly™ feature. Cancel anytime, no questions asked.
           </p>
           <motion.p
             initial={{ opacity: 0 }}

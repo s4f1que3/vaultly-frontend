@@ -22,7 +22,7 @@ export default function TermsPage() {
           </Link>
           <Link href="/subscribe" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Vaultly" width={28} height={28} className="rounded-lg" />
-            <span className="font-bold text-sm text-[var(--color-text-primary)]">Vaultly</span>
+            <span className="font-bold text-sm text-[var(--color-text-primary)]">Vaultly™</span>
           </Link>
         </div>
 
