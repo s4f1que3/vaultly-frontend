@@ -227,7 +227,7 @@ export default function HomePage() {
                   href="/subscribe"
                   className="px-8 py-3 bg-[var(--color-accent)] text-[#0d0a06] rounded-lg font-semibold hover:bg-[var(--color-accent-hover)] transition-all inline-flex items-center gap-2 text-base"
                 >
-                  Get Started Free
+                  Get Started
                   <ArrowRight size={18} />
                 </Link>
                 <Link
