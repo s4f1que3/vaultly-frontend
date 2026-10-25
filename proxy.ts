@@ -8,14 +8,7 @@ const AUTH_ONLY_ROUTES = ['/login', '/signup', '/forgot-password'];
 // Routes anyone can access regardless of auth state
 const OPEN_ROUTES = [
   '/',
-  '/subscribe',
   '/terms',
-  '/license',
-  '/license/purchase',
-  '/license/success',
-  '/signup/license',
-  '/billing/success',
-  '/billing/cancel',
 ];
 
 export async function proxy(request: NextRequest) {

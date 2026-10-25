@@ -117,7 +117,7 @@ export default function HomePage() {
               Log in
             </Link>
             <Link
-              href="/subscribe"
+              href="/signup"
               className="px-4 py-2 text-sm font-medium bg-[var(--color-accent)] text-[#0d0a06] rounded-lg hover:bg-[var(--color-accent-hover)] transition-all font-semibold"
             >
               Get Started
@@ -175,7 +175,7 @@ export default function HomePage() {
                   Log in
                 </Link>
                 <Link
-                  href="/subscribe"
+                  href="/signup"
                   className="block text-center px-4 py-2 text-sm font-medium bg-[var(--color-accent)] text-[#0d0a06] rounded-lg font-semibold"
                 >
                   Get Started
@@ -224,7 +224,7 @@ export default function HomePage() {
                 className="flex flex-col sm:flex-row items-center justify-center gap-4"
               >
                 <Link
-                  href="/subscribe"
+                  href="/signup"
                   className="px-8 py-3 bg-[var(--color-accent)] text-[#0d0a06] rounded-lg font-semibold hover:bg-[var(--color-accent-hover)] transition-all inline-flex items-center gap-2 text-base"
                 >
                   Get Started
@@ -522,9 +522,9 @@ export default function HomePage() {
                 <div className="flex gap-3">
                   <CheckCircle className="text-[var(--color-accent)] flex-shrink-0 mt-0.5" size={20} />
                   <div>
-                    <h3 className="font-semibold text-[var(--color-text-primary)]">Cancel Anytime</h3>
+                    <h3 className="font-semibold text-[var(--color-text-primary)]">Free to Use</h3>
                     <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                      No long contracts. Monthly or yearly plans with the freedom to cancel whenever you want.
+                      No subscriptions, no paywalls, no hidden fees. Every feature is free.
                     </p>
                   </div>
                 </div>
@@ -544,9 +544,9 @@ export default function HomePage() {
                 <div className="flex gap-3">
                   <CheckCircle className="text-[var(--color-accent)] flex-shrink-0 mt-0.5" size={20} />
                   <div>
-                    <h3 className="font-semibold text-[var(--color-text-primary)]">Lifetime License Option</h3>
+                    <h3 className="font-semibold text-[var(--color-text-primary)]">No Credit Card</h3>
                     <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                      Prefer one-time payment? Buy a lifetime license for $2000 and own your access forever.
+                      Sign up with an email and start tracking right away. Nothing to buy.
                     </p>
                   </div>
                 </div>
@@ -602,10 +602,10 @@ export default function HomePage() {
                 className="flex flex-col sm:flex-row items-center justify-center gap-4"
               >
                 <Link
-                  href="/subscribe"
+                  href="/signup"
                   className="px-8 py-3 bg-[var(--color-accent)] text-[#0d0a06] rounded-lg font-semibold hover:bg-[var(--color-accent-hover)] transition-all inline-flex items-center gap-2 text-base"
                 >
-                  Subscribe
+                  Get Started
                   <ArrowRight size={18} />
                 </Link>
                 <Link
@@ -617,7 +617,7 @@ export default function HomePage() {
               </motion.div>
 
               <p className="text-sm text-[var(--color-text-muted)] mt-6">
-                Subscribe today and access all features immediately.
+                Sign up free and access all features immediately.
               </p>
             </motion.div>
           </div>

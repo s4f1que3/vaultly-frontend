@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
 import CreditCard from '@/components/cards/CreditCard';
 import { useCardStore } from '@/stores/useCardStore';
-import { useBillingStore } from '@/stores/useBillingStore';
 import { useSavingsStore } from '@/stores/useSavingsStore';
 import { Transaction } from '@/types';
 import api from '@/lib/api';
@@ -29,7 +28,6 @@ export default function CardDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { cards, fetchCards } = useCardStore();
-  const { isChecking, access } = useBillingStore();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,13 +35,11 @@ export default function CardDetailPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    if (!isChecking && access?.hasAccess) {
-      fetchCards();
-    }
-  }, [fetchCards, isChecking, access]);
+    fetchCards();
+  }, [fetchCards]);
 
   useEffect(() => {
-    if (!id || isChecking || !access?.hasAccess) return;
+    if (!id) return;
     setIsLoading(true);
     const params = new URLSearchParams({ cardId: id, page: String(page), limit: '20' });
     api.get<PaginatedResponse<Transaction>>(`/transactions?${params}`)
@@ -52,7 +48,7 @@ export default function CardDetailPage() {
         setTotalPages(res.meta.totalPages);
       })
       .finally(() => setIsLoading(false));
-  }, [id, page, isChecking, access]);
+  }, [id, page]);
 
   const { pots, fetchPots } = useSavingsStore();
   useEffect(() => { fetchPots(); }, [fetchPots]);

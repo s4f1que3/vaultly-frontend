@@ -158,8 +158,8 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-[var(--color-text-secondary)]">
               Don&apos;t have an account?{' '}
-              <Link href="/subscribe" className="text-[var(--color-accent)] font-medium hover:underline">
-                View plans
+              <Link href="/signup" className="text-[var(--color-accent)] font-medium hover:underline">
+                Sign up free
               </Link>
             </p>
           </div>

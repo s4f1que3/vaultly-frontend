@@ -14,13 +14,13 @@ export default function TermsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <Link
-            href="/subscribe"
+            href="/"
             className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
           >
             <ArrowLeft size={15} />
             Back
           </Link>
-          <Link href="/subscribe" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Vaultly" width={28} height={28} className="rounded-lg" />
             <span className="font-bold text-sm text-[var(--color-text-primary)]">Vaultly™</span>
           </Link>
@@ -45,7 +45,7 @@ export default function TermsPage() {
               1. Acceptance of Terms
             </h2>
             <p>
-              By creating an account, subscribing to a plan, or otherwise accessing or using Vaultly
+              By creating an account or otherwise accessing or using Vaultly
               (&ldquo;the Service&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;),
               you agree to be bound by these Terms &amp; Conditions. If you do not agree to all of
               these terms, you may not access or use the Service.
@@ -81,8 +81,7 @@ export default function TermsPage() {
               3. Account Registration
             </h2>
             <p>
-              To use Vaultly, you must create an account and hold an active paid subscription or a
-              valid lifetime license. You agree to provide accurate, current, and complete information
+              To use Vaultly, you must create an account. You agree to provide accurate, current, and complete information
               during registration and to keep your account details up to date.
             </p>
             <p>
@@ -100,59 +99,26 @@ export default function TermsPage() {
           {/* 4 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-[var(--color-accent)]">
-              4. Subscriptions &amp; Payment
+              4. Free Service
             </h2>
             <p>
-              Access to Vaultly requires one of the following paid plans:
-            </p>
-            <ul className="list-disc list-inside space-y-1.5 ml-2">
-              <li>
-                <span className="text-[var(--color-text-primary)] font-medium">Monthly</span>
-                {' '}— $8.00 USD per month, billed monthly and recurring until cancelled.
-              </li>
-              <li>
-                <span className="text-[var(--color-text-primary)] font-medium">Yearly</span>
-                {' '}— $100.00 USD per year, billed once annually and recurring until cancelled.
-              </li>
-              <li>
-                <span className="text-[var(--color-text-primary)] font-medium">Lifetime License</span>
-                {' '}— $2000.00 USD one-time payment granting permanent access to the Service.
-              </li>
-            </ul>
-            <p>
-              All payments are processed securely through PayPal. By subscribing, you authorize
-              Vaultly to charge your selected payment method on the applicable billing cycle.
-              Subscription fees are charged in advance. Prices are listed in USD and are subject to
-              change with reasonable notice.
+              Vaultly is provided free of charge. No subscription, payment, or license is required to
+              create an account or use the Service, and we do not charge for any features.
             </p>
             <p>
-              Your subscription renews automatically unless you cancel before the next billing date.
-              We will provide advance notice of any price changes. Continued use of the Service after
-              a price change takes effect constitutes acceptance of the new pricing.
+              We may introduce paid features or plans in the future. If we do, we will give you advance
+              notice, and any paid feature will remain optional unless you agree to the new terms.
             </p>
           </section>
 
           {/* 5 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-[var(--color-accent)]">
-              5. Cancellations &amp; Refunds
+              5. Termination
             </h2>
             <p>
-              You may cancel your subscription at any time through your account settings or by
-              contacting us. Upon cancellation, your access to the Service will continue until the
-              end of the current paid billing period. No refunds are issued are issued at any point in time for any reason.
-              For issues with purchases, our payments are handled via paypal. This means that any issues should be forwarded to them.
-            </p>
-            <p>
-              Lifetime licenses are non-refundable once issued, as the license key is immediately
-              generated and delivered upon payment. If you have not yet redeemed your license key and
-              encounter a genuine technical issue preventing delivery, please contact us within 7 days
-              of purchase.
-            </p>
-            <p>
-              If a payment fails, your account will enter a grace period. If the outstanding payment
-              is not resolved before the grace period expires, access to the Service will be
-              suspended until the balance is settled.
+              You may stop using Vaultly and delete your account at any time by contacting us. We may
+              suspend or terminate accounts that violate these terms.
             </p>
           </section>
 
@@ -168,8 +134,8 @@ export default function TermsPage() {
             </p>
             <p>
               We do not sell, share, or disclose your personal or financial data to third parties,
-              except as required by law or as necessary to provide the Service (for example, payment
-              processing through PayPal). We take reasonable technical measures to protect your data,
+              except as required by law or as necessary to provide the Service (for example, data
+              hosting through Supabase). We take reasonable technical measures to protect your data,
               but no system is completely secure, and we cannot guarantee absolute security.
             </p>
             <p>
@@ -194,11 +160,11 @@ export default function TermsPage() {
               <li>Reverse-engineer, decompile, or attempt to extract the source code of the Service.</li>
               <li>Use automated tools (bots, scrapers, crawlers) to access or interact with the Service.</li>
               <li>Impersonate another person or misrepresent your identity.</li>
-              <li>Share, resell, or sublicense your account or license key to any other party.</li>
+              <li>Share, resell, or sublicense your account to any other party.</li>
             </ul>
             <p>
               We reserve the right to immediately suspend or terminate accounts found in violation
-              of this section without refund.
+              of this section.
             </p>
           </section>
 
@@ -215,7 +181,7 @@ export default function TermsPage() {
             <p>
               These terms do not grant you any ownership interest in the Service. You are granted a
               limited, non-exclusive, non-transferable license to use the Service solely for your
-              personal financial tracking purposes while your subscription or license is active.
+              personal financial tracking purposes while your account is active.
             </p>
           </section>
 
@@ -264,8 +230,7 @@ export default function TermsPage() {
               or harmful activity. Upon termination, your right to access the Service ends immediately.
             </p>
             <p>
-              You may also terminate your account at any time by contacting us. Termination does not
-              entitle you to a refund of any prepaid fees, except at our sole discretion.
+              You may also terminate your account at any time by contacting us.
             </p>
           </section>
 
@@ -282,7 +247,7 @@ export default function TermsPage() {
             <p>
               Your continued use of Vaultly after any changes take effect constitutes your acceptance
               of the revised terms. If you do not agree to the updated terms, you must stop using the
-              Service and cancel your subscription.
+              Service and delete your account.
             </p>
           </section>
 

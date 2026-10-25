@@ -91,33 +91,10 @@ const jsonLd = {
       '@id': `${siteUrl}/#app`,
       name: 'Vaultly',
       description:
-        'Premium personal finance app to track expenses, set budgets, manage savings goals, and understand your spending.',
+        'Personal finance app to track expenses, set budgets, manage savings goals, and understand your spending.',
       applicationCategory: 'FinanceApplication',
       operatingSystem: 'Web',
       url: siteUrl,
-      offers: [
-        {
-          '@type': 'Offer',
-          name: 'Monthly Plan',
-          price: '8.00',
-          priceCurrency: 'USD',
-          description: 'Full access, billed monthly — cancel anytime',
-        },
-        {
-          '@type': 'Offer',
-          name: 'Yearly Plan',
-          price: '100.00',
-          priceCurrency: 'USD',
-          description: 'Full access, billed once per year — save $16',
-        },
-        {
-          '@type': 'Offer',
-          name: 'Lifetime License',
-          price: '2000.00',
-          priceCurrency: 'USD',
-          description: 'One-time payment, unlimited access forever',
-        },
-      ],
       featureList: [
         'Transaction tracking',
         'Smart budget alerts',

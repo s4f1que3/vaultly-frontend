@@ -10,7 +10,6 @@ import PageHeader from '@/components/ui/PageHeader';
 import Modal from '@/components/ui/Modal';
 import { useRecurringStore } from '@/stores/useRecurringStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
-import { useBillingStore } from '@/stores/useBillingStore';
 import { RecurringTransaction, TransactionCategory } from '@/types';
 import { CATEGORY_LABELS, CATEGORY_ICONS, formatCurrency, formatDate } from '@/lib/utils/formatters';
 
@@ -405,13 +404,12 @@ function RecurringModal({ isOpen, onClose, item }: { isOpen: boolean; onClose: (
 
 export default function RecurringPage() {
   const { items, isLoading, fetchRecurring, deleteRecurring, toggleActive } = useRecurringStore();
-  const { isChecking, access } = useBillingStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<RecurringTransaction | null>(null);
 
   useEffect(() => {
-    if (!isChecking && access?.hasAccess) fetchRecurring();
-  }, [fetchRecurring, isChecking, access]);
+    fetchRecurring();
+  }, [fetchRecurring]);
 
   const active = items.filter((r) => r.is_active);
   const paused = items.filter((r) => !r.is_active);

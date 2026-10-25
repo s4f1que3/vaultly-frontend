@@ -6,7 +6,6 @@ import { Plus, Trash2, Pencil, PiggyBank, X, Check } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import { useSavingsStore, SavingsPot } from '@/stores/useSavingsStore';
-import { useBillingStore } from '@/stores/useBillingStore';
 import { formatCurrency } from '@/lib/utils/formatters';
 
 const EMOJI_SUGGESTIONS = ['💰', '🏦', '✈️', '🏠', '🚗', '🎓', '💊', '🛍️', '🌴', '💍', '📱', '🎮'];
@@ -171,15 +170,12 @@ function PotModal({ isOpen, onClose, pot }: PotModalProps) {
 
 export default function SavingsPage() {
   const { pots, isLoading, fetchPots, deletePot } = useSavingsStore();
-  const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editPot, setEditPot] = useState<SavingsPot | null>(null);
 
   useEffect(() => {
-    if (!isChecking && access?.hasAccess) {
-      fetchPots();
-    }
-  }, [fetchPots, isChecking, access]);
+    fetchPots();
+  }, [fetchPots]);
 
   const totalSaved = pots.reduce((s, p) => s + p.amount, 0);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Footer from '@/components/ui/Footer';
@@ -13,9 +13,6 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/stores/useNotificationStore';
-import { useBillingStore } from '@/stores/useBillingStore';
-import SubscriptionWall from '@/components/billing/SubscriptionWall';
-import api from '@/lib/api';
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -39,13 +36,10 @@ function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { unreadCount, fetchNotifications } = useNotificationStore();
-  const { isChecking, access } = useBillingStore();
 
   useEffect(() => {
-    if (!isChecking && access?.hasAccess) {
-      fetchNotifications();
-    }
-  }, [fetchNotifications, isChecking, access]);
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -217,61 +211,6 @@ function MobileNav() {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { access, isChecking, fetchStatus } = useBillingStore();
-  const fetched = useRef(false);
-
-  useEffect(() => {
-    if (fetched.current) return;
-    fetched.current = true;
-
-    const initAccess = async () => {
-      // Redeem a pending license key stored during license signup
-      const pendingKey = localStorage.getItem('pending_license');
-      if (pendingKey) {
-        try {
-          await api.post('/licenses/redeem', { license_key: pendingKey });
-        } catch {
-          // Already redeemed or invalid — safe to ignore, just clear it
-        }
-        localStorage.removeItem('pending_license');
-      }
-      await fetchStatus();
-    };
-
-    initAccess().catch(() => {});
-  }, [fetchStatus]);
-
-  const isSettingsPage = pathname === '/settings';
-
-  // Only show the initial loading spinner — not on re-fetches (which keep existing access value)
-  const stillChecking = !access;
-  const willRedirect = !isChecking && access &&
-    (access.status === 'none' || access.status === 'pending');
-  const showWall = !isChecking && access &&
-    !access.hasAccess && !isSettingsPage &&
-    access.status !== 'none' && access.status !== 'pending';
-
-  // Redirect — but keep showing spinner while the router.replace fires
-  // so children never mount and never make blocked API calls
-  useEffect(() => {
-    if (willRedirect) router.replace('/subscribe');
-  }, [willRedirect, router]);
-
-  if (stillChecking || willRedirect) {
-    return (
-      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[var(--color-text-muted)]">Loading…</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (showWall) {
-    return <SubscriptionWall access={access!} />;
-  }
 
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)] overflow-x-hidden">

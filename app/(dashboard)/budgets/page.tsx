@@ -11,7 +11,6 @@ import PageHeader from '@/components/ui/PageHeader';
 import Modal from '@/components/ui/Modal';
 import { useBudgetStore } from '@/stores/useBudgetStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
-import { useBillingStore } from '@/stores/useBillingStore';
 import { Budget, TransactionCategory, CategoryForecast, SpendingForecast } from '@/types';
 import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS, formatCurrency, formatPercentage } from '@/lib/utils/formatters';
 import api from '@/lib/api';
@@ -192,18 +191,15 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
 
 export default function BudgetsPage() {
   const { budgets, isLoading, fetchBudgets, deleteBudget, toggleRollover } = useBudgetStore();
-  const { isChecking, access } = useBillingStore();
   const [showModal, setShowModal] = useState(false);
   const [editBudget, setEditBudget] = useState<Budget | null>(null);
   const [forecast, setForecast] = useState<SpendingForecast | null>(null);
 
   useEffect(() => {
-    if (!isChecking && access?.hasAccess) {
-      fetchBudgets();
-      api.get<SpendingForecast>('/intelligence/forecast')
-        .then(setForecast).catch(() => {});
-    }
-  }, [fetchBudgets, isChecking, access]);
+    fetchBudgets();
+    api.get<SpendingForecast>('/intelligence/forecast')
+      .then(setForecast).catch(() => {});
+  }, [fetchBudgets]);
 
   const getForecast = (category: string): CategoryForecast | undefined =>
     forecast?.forecasts.find((f) => f.category === category);

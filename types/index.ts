@@ -398,57 +398,6 @@ export interface CashflowIntelligence {
   };
 }
 
-// ─── App Billing (Vaultly subscription) ────────────────────────────────────
-export type BillingPlan = 'monthly' | 'yearly';
-export type SubscriptionStatus =
-  | 'pending'
-  | 'active'
-  | 'past_due'
-  | 'frozen'
-  | 'cancelled';
-
-export interface AppSubscription {
-  id: string;
-  user_id: string;
-  plan: BillingPlan;
-  status: SubscriptionStatus;
-  billing_day: number;
-  current_period_start: string;
-  current_period_end: string;
-  next_billing_date: string;
-  grace_period_end: string | null;
-  paypal_subscription_id: string | null;
-  pending_paypal_subscription_id: string | null;
-  pending_plan: BillingPlan | null;
-  payment_method_last4: string | null;
-  payment_method_brand: string | null;
-  cancelled_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AccessCheck {
-  hasAccess: boolean;
-  status: string;
-  message?: string;
-  gracePeriodEnd?: string;
-  periodEnd?: string;
-}
-
-export interface PaymentRecord {
-  id: string;
-  user_id: string;
-  amount: number;
-  currency: string;
-  status: 'succeeded' | 'failed' | 'pending' | 'refunded';
-  plan: BillingPlan;
-  paypal_subscription_id: string | null;
-  paypal_capture_id: string | null;
-  billing_date: string;
-  description: string | null;
-  created_at: string;
-}
-
 // ─── Summaries ─────────────────────────────────────────────────────────────
 
 export interface SummaryCardBreakdown {

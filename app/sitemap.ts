@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${siteUrl}/subscribe`,
+      url: `${siteUrl}/signup`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.95,
@@ -21,12 +21,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/license`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.85,
     },
     {
       url: `${siteUrl}/terms`,

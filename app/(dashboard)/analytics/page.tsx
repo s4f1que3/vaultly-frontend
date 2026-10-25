@@ -11,7 +11,6 @@ import { TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import { useTransactionStore } from '@/stores/useTransactionStore';
 import { useBudgetStore } from '@/stores/useBudgetStore';
-import { useBillingStore } from '@/stores/useBillingStore';
 import {
   formatCurrency, formatCompact, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS,
 } from '@/lib/utils/formatters';
@@ -34,7 +33,6 @@ const TICK_PROPS = { fill: 'var(--color-text-muted)', fontSize: 11 };
 export default function AnalyticsPage() {
   const { transactions, fetchTransactions } = useTransactionStore();
   const { budgets, fetchBudgets } = useBudgetStore();
-  const { isChecking, access } = useBillingStore();
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const [anomalies, setAnomalies] = useState<SpendingAnomaly[]>([]);
   const [categoryTrends, setCategoryTrends] = useState<CategoryMonthTrend[]>([]);
@@ -42,19 +40,17 @@ export default function AnalyticsPage() {
   const [forecast, setForecast] = useState<SpendingForecast | null>(null);
 
   useEffect(() => {
-    if (!isChecking && access?.hasAccess) {
-      fetchTransactions();
-      fetchBudgets();
-      // Load anomalies and build category trends from transactions
-      api.get<{ anomalies: SpendingAnomaly[] }>('/intelligence/anomalies')
-        .then((r) => setAnomalies(r.anomalies ?? []))
-        .catch(() => {});
-      api.get<SeasonalityData>('/intelligence/seasonality')
-        .then(setSeasonality).catch(() => {});
-      api.get<SpendingForecast>('/intelligence/forecast')
-        .then(setForecast).catch(() => {});
-    }
-  }, [fetchTransactions, fetchBudgets, isChecking, access]);
+    fetchTransactions();
+    fetchBudgets();
+    // Load anomalies and build category trends from transactions
+    api.get<{ anomalies: SpendingAnomaly[] }>('/intelligence/anomalies')
+      .then((r) => setAnomalies(r.anomalies ?? []))
+      .catch(() => {});
+    api.get<SeasonalityData>('/intelligence/seasonality')
+      .then(setSeasonality).catch(() => {});
+    api.get<SpendingForecast>('/intelligence/forecast')
+      .then(setForecast).catch(() => {});
+  }, [fetchTransactions, fetchBudgets]);
 
   // Build month-over-month category trends from loaded transactions
   useEffect(() => {

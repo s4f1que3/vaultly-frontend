@@ -14,13 +14,13 @@ export default function PrivacyPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <Link
-            href="/subscribe"
+            href="/"
             className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
           >
             <ArrowLeft size={15} />
             Back
           </Link>
-          <Link href="/subscribe" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Vaultly" width={28} height={28} className="rounded-lg" />
             <span className="font-bold text-sm text-[var(--color-text-primary)]">Vaultly™</span>
           </Link>
@@ -76,10 +76,6 @@ export default function PrivacyPage() {
                 related financial records that you voluntarily input.
               </li>
               <li>
-                <span className="text-[var(--color-text-primary)] font-medium">Payment Information:</span>
-                {' '}Payment method details are processed by PayPal and are not stored by us.
-              </li>
-              <li>
                 <span className="text-[var(--color-text-primary)] font-medium">Basic Log Data:</span>
                 {' '}IP address and browser information for security and debugging purposes only.
               </li>
@@ -115,7 +111,6 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside space-y-1.5 ml-2">
               <li>Create and manage your account.</li>
               <li>Store and display your financial data within the app.</li>
-              <li>Process your payments through PayPal.</li>
               <li>Provide customer support and respond to inquiries.</li>
               <li>Detect and prevent fraud or unauthorized access.</li>
               <li>Comply with legal obligations or court orders.</li>
@@ -160,11 +155,6 @@ export default function PrivacyPage() {
               The only exceptions are:
             </p>
             <ul className="list-disc list-inside space-y-1.5 ml-2">
-              <li>
-                <span className="text-[var(--color-text-primary)] font-medium">Payment Processing:</span>
-                {' '}PayPal receives only the payment information necessary to process your
-                subscription or license purchase.
-              </li>
               <li>
                 <span className="text-[var(--color-text-primary)] font-medium">Data Hosting:</span>
                 {' '}Supabase stores your data on our behalf under strict confidentiality obligations.
@@ -281,7 +271,7 @@ export default function PrivacyPage() {
             </h2>
             <p>
               We retain your data for as long as your account is active. Once your account is deleted
-              or your subscription terminates, we retain data only as long as required by law or for
+              or your account is closed, we retain data only as long as required by law or for
               legitimate business purposes (such as fraud prevention or accounting).
             </p>
             <p>
